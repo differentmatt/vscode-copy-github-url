@@ -11,6 +11,10 @@
   "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
   "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
   "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#3AE71E",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "0.10.x"
   },
