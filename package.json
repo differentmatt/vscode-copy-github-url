@@ -8,8 +8,8 @@
     "type": "git",
     "url": "https://github.com/differentmatt/vscode-copy-github-url"
   },
-  "homepage": "https://github.com/differnmatt/vscode-copy-github-url/blob/master/README.md",
-  "bugs": "https://github.com/differnmatt/vscode-copy-github-url/issues",
+  "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
+  "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
   "engines": {
     "vscode": "0.10.x"
   },

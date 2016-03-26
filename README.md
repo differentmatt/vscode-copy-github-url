@@ -7,4 +7,4 @@ Usage: `Ctrl+L C`
 ## Install
 
 1. Within Visual Studio Code, open the command palette (`Ctrl-Shift-P` / `Cmd-Shift-P`)
-2. Type `Install Extension` and search for `copy github url`
+2. Type `install extension` and search for `copy github url`
