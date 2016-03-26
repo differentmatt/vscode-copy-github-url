@@ -10,6 +10,7 @@
   },
   "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
   "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "0.10.x"
   },
