@@ -1,56 +1,56 @@
 {
-  "name": "copy-github-url",
-  "version": "0.0.1",
-  "publisher": "mattlott",
-  "displayName": "Copy GitHub URL",
-  "description": "Copy GitHub URL for current location to clipboard.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/differentmatt/vscode-copy-github-url"
-  },
-  "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
-  "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
-  "icon": "images/icon.png",
-  "galleryBanner": {
-    "color": "#3AE71E",
-    "theme": "dark"
-  },
-  "engines": {
-    "vscode": "0.10.x"
-  },
-  "categories": [
-    "Other",
-    "Snippets"
-  ],
-  "activationEvents": [
-    "onCommand:extension.gitHubUrl"
-  ],
-  "main": "./extension",
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.gitHubUrl",
-        "title": "Copy GitHub URL"
-      }
+    "name": "copy-github-url",
+    "version": "0.0.3",
+    "publisher": "mattlott",
+    "displayName": "Copy GitHub URL",
+    "description": "Copy GitHub URL for current location to clipboard.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/differentmatt/vscode-copy-github-url"
+    },
+    "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
+    "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
+    "icon": "images/icon.png",
+    "galleryBanner": {
+        "color": "#009933",
+        "theme": "dark"
+    },
+    "engines": {
+        "vscode": "0.10.x"
+    },
+    "categories": [
+        "Other",
+        "Snippets"
     ],
-    "keybindings": [
-      {
-        "command": "extension.gitHubUrl",
-        "key": "ctrl+l c",
-        "when": "editorTextFocus"
-      }
-    ]
-  },
-  "scripts": {
-    "postinstall": "node ./node_modules/vscode/bin/install"
-  },
-  "devDependencies": {
-    "vscode": "^0.10.11"
-  },
-  "dependencies": {
-    "copy-paste": "^1.1.4",
-    "git-branch": "^0.3.0",
-    "github-url-from-git": "^1.4.0",
-    "parse-git-config": "^0.3.2"
-  }
+    "activationEvents": [
+        "onCommand:extension.gitHubUrl"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.gitHubUrl",
+                "title": "Copy GitHub URL"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.gitHubUrl",
+                "key": "ctrl+l c",
+                "when": "editorTextFocus"
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "vscode": "^0.10.11"
+    },
+    "dependencies": {
+        "copy-paste": "^1.1.4",
+        "git-branch": "^0.3.0",
+        "github-url-from-git": "^1.4.0",
+        "parse-git-config": "^0.3.2"
+    }
 }
