@@ -15,7 +15,7 @@ function activate(context) {
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
   let disposable = vscode.commands.registerCommand('extension.gitHubUrl', () => {
-    
+
     // The code you place here will be executed every time your command is executed
     try {
       let editor = vscode.window.activeTextEditor;
@@ -30,7 +30,8 @@ function activate(context) {
       if (config['remote \"origin\"']) {
         let githubRootUrl = githubUrlFromGit(config['remote \"origin\"'].url);
         let subdir = editor.document.fileName.substring(cwd.length);
-        let url = `${githubRootUrl}/blob/${branch}${subdir}#L${lineIndex}`
+        let url = `${githubRootUrl}/blob/${branch}${subdir}#L${lineIndex}`;
+        url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
         copyPaste.copy(url);
       }
     }
