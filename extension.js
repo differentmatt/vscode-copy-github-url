@@ -27,10 +27,11 @@ function activate(context) {
       let cwd = vscode.workspace.rootPath;
       let config = parseConfig.sync({cwd: cwd});
       let branch = gitBranch.sync(cwd);
-      let remote = config[`branch "${branch}"`].remote || 'origin';
+      let remoteConfig = config[`branch "${branch}"`];
+      let remoteName = remoteConfig && remoteConfig.remote ? remoteConfig.remote : 'origin';
 
-      if (config[`remote "${remote}"`]) {
-        let githubRootUrl = githubUrlFromGit(config[`remote "${remote}"`].url);
+      if (config[`remote "${remoteName}"`]) {
+        let githubRootUrl = githubUrlFromGit(config[`remote "${remoteName}"`].url);
         let subdir = editor.document.fileName.substring(cwd.length);
         let url = `${githubRootUrl}/blob/${branch}${subdir}#L${lineIndex}`;
         url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
