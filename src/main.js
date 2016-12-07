@@ -20,7 +20,7 @@ module.exports = {
       return null;
     }
 
-    let lineQuery = 'L' + (selection.active.line + 1);
+    let lineQuery = 'L' + (selection.start.line + 1);
 
     if ( !selection.isSingleLine ) {
       // Selection might be spanned across multiple lines.

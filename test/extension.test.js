@@ -107,4 +107,20 @@ suite('main', function() {
 
 		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L31-L41', 'Invalid URL returned');
 	});
+
+	test('getGithubUrl - same active.line as end.line', function() {
+		// Tehere might be a case, where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
+		let vsCodeMock = getVsCodeMock( {
+			startLine: 1,
+			endLine: 5,
+			projectDirectory: 'T:\foo',
+			filePath: 'bar.md'
+		} );
+
+		vsCodeMock.window.activeTextEditor.selection.active.line = 5;
+
+		let url = main.getGithubUrl( vsCodeMock );
+
+		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L2-L6', 'Invalid URL returned');
+	});
 });
