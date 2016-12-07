@@ -71,7 +71,8 @@ suite('main', function() {
 			branch:'master',
 			remote:'origin',
 			url:'git@github.com:foo/bar-baz.git',
-			githubUrl:'https://github.com/foo/bar-baz'
+			githubUrl:'https://github.com/foo/bar-baz',
+			hash: '1a1433f'
 		};
 	}
 
@@ -106,6 +107,18 @@ suite('main', function() {
 		let url = main.getGithubUrl( vsCodeMock );
 
 		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L31-L41', 'Invalid URL returned');
+	});
+
+	test('getGithubUrl - permalink', function() {
+		let vsCodeMock = getVsCodeMock( {
+			startLine: 0,
+			endLine: 1,
+			projectDirectory: 'T:\lorem',
+			filePath: 'ipsum.md'
+		} );
+		let url = main.getGithubUrl( vsCodeMock, true );
+
+		assert.equal(url, 'https://github.com/foo/bar-baz/blob/1a1433f/ipsum.md#L1-L2', 'Invalid URL returned');
 	});
 
 	test('getGithubUrl - same active.line as end.line', function() {
