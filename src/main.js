@@ -14,16 +14,24 @@ module.exports = {
    */
   getGithubUrl: function( vscode ) {
     let editor = vscode.window.activeTextEditor;
+    let selection = editor.selection;
     if (!editor) {
       console.error('No open text editor');
       return null;
     }
-    let lineIndex = editor.selection.active.line + 1;
+
+    let lineQuery = 'L' + (selection.active.line + 1);
+
+    if ( !selection.isSingleLine ) {
+      // Selection might be spanned across multiple lines.
+      lineQuery += ('-L' + (selection.end.line + 1));
+    }
+
     let cwd = vscode.workspace.rootPath;
     let gitInfo = this._getGitInfo( vscode );
     let subdir = editor.document.fileName.substring(cwd.length);
 
-    let url = `${gitInfo.githubUrl}/blob/${gitInfo.branch}${subdir}#L${lineIndex}`;
+    let url = `${gitInfo.githubUrl}/blob/${gitInfo.branch}${subdir}#${lineQuery}`;
     url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
     return url;
   },

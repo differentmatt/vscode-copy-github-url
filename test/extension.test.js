@@ -21,7 +21,8 @@ suite('main', function() {
 	 * A helper function to return a vscode object imitation.
 	 *
 	 * @param {Object} [options]
-	 * @param {Number} [options.line] Current, focused line number.
+	 * @param {Number} [options.startLine] Current, focused line number.
+	 * @param {Number} [options.endLine] Line number where the current selection ends.
 	 * @param {String} [options.projectDirectory] Absolute path to the project directory.
 	 * @param {String} [options.filePath] File path **relative to** `projectDirectory`.
 	 * @returns {Object} An `vscode` alike object.
@@ -30,7 +31,12 @@ suite('main', function() {
 		let editorMock = {
 			selection: {
 				active: {
-					line: options.line || 1
+					line: options.startLine !== undefined ? options.startLine : 1
+				},
+				start: {
+					line: options.startLine !== undefined ? options.startLine : 1
+				},
+				end: {
 				}
 			},
 			document: {
@@ -38,6 +44,16 @@ suite('main', function() {
 					'F:\\my\\workspace\\foo\\subdir1\\subdir2\\myFileName.txt'
 			}
 		};
+
+		if ( options.endLine !== undefined ) {
+			editorMock.selection.end.line = options.endLine;
+		} else {
+			// If endLine is unspecified just set it to the same as start line.
+			editorMock.selection.end.line = editorMock.selection.start.line;
+		}
+
+		// And then we can determine if the selection is collapsed or not.
+		editorMock.selection.isSingleLine = editorMock.selection.start.line == editorMock.selection.end.line;
 
 		return vsCodeMock = {
 			workspace: {
@@ -61,7 +77,7 @@ suite('main', function() {
 
 	test('getGithubUrl - windows path', function() {
 		let vsCodeMock = getVsCodeMock( {
-			line: 4
+			startLine: 4
 		} );
 		let url = main.getGithubUrl( vsCodeMock );
 
@@ -70,12 +86,25 @@ suite('main', function() {
 
 	test('getGithubUrl - windows path file directly in project dir', function() {
 		let vsCodeMock = getVsCodeMock( {
-			line: 102,
+			startLine: 102,
 			projectDirectory: 'T:\foo',
 			filePath: 'bar.md'
 		} );
 		let url = main.getGithubUrl( vsCodeMock );
 
 		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L103', 'Invalid URL returned');
+	});
+
+	test('getGithubUrl - ranged selection', function() {
+		// Test a case when the selection is spanned across multiple lines.
+		let vsCodeMock = getVsCodeMock( {
+			startLine: 30,
+			endLine: 40,
+			projectDirectory: 'T:\foo',
+			filePath: 'bar.md'
+		} );
+		let url = main.getGithubUrl( vsCodeMock );
+
+		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L31-L41', 'Invalid URL returned');
 	});
 });
