@@ -21,13 +21,9 @@ module.exports = {
     let lineIndex = editor.selection.active.line + 1;
     let cwd = vscode.workspace.rootPath;
     let gitInfo = this._getGitInfo( vscode );
-    let remoteName = gitInfo.remote;
-    let branch = gitInfo.branch;
-    let githubRootUrl = gitInfo.githubUrl;
-
-
     let subdir = editor.document.fileName.substring(cwd.length);
-    let url = `${githubRootUrl}/blob/${branch}${subdir}#L${lineIndex}`;
+
+    let url = `${gitInfo.githubUrl}/blob/${gitInfo.branch}${subdir}#L${lineIndex}`;
     url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
     return url;
   },

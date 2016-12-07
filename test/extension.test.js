@@ -13,9 +13,42 @@ let assert = require('assert');
 let vscode = require('vscode');
 let myExtension = require('../extension');
 let main = require('../src/main');
+let path = require('path');
 
 // Defines a Mocha test suite to group tests of similar kind together
 suite('main', function() {
+	/**
+	 * A helper function to return a vscode object imitation.
+	 *
+	 * @param {Object} [options]
+	 * @param {Number} [options.line] Current, focused line number.
+	 * @param {String} [options.projectDirectory] Absolute path to the project directory.
+	 * @param {String} [options.filePath] File path **relative to** `projectDirectory`.
+	 * @returns {Object} An `vscode` alike object.
+	 */
+	function getVsCodeMock( options ) {
+		let editorMock = {
+			selection: {
+				active: {
+					line: options.line || 1
+				}
+			},
+			document: {
+				fileName: options.filePath ? ( options.projectDirectory + path.sep + options.filePath ) :
+					'F:\\my\\workspace\\foo\\subdir1\\subdir2\\myFileName.txt'
+			}
+		};
+
+		return vsCodeMock = {
+			workspace: {
+				rootPath: options.projectDirectory || 'F:\\my\\workspace\\foo'
+			},
+			window: {
+				activeTextEditor: editorMock
+			}
+		};
+	}
+
 	main._getGitInfo = function( vscode ) {
 		// Stub the method to always have the same results.
 		return {
@@ -27,26 +60,22 @@ suite('main', function() {
 	}
 
 	test('getGithubUrl - windows path', function() {
-		let editorMock = {
-			selection: {
-				active: {
-					line: 4
-				}
-			},
-			document: {
-				fileName: 'F:\\my\\workspace\\foo\\subdir1\\subdir2\\myFileName.txt'
-			}
-		};
-		let vsCodeMock = {
-			workspace: {
-				rootPath: 'F:\\my\\workspace\\foo'
-			},
-			window: {
-				activeTextEditor: editorMock
-			}
-		};
+		let vsCodeMock = getVsCodeMock( {
+			line: 4
+		} );
 		let url = main.getGithubUrl( vsCodeMock );
 
-		assert.equal('https://github.com/foo/bar-baz/blob/master/subdir1/subdir2/myFileName.txt#L5', url, 'Invalid URL returned');
+		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/subdir1/subdir2/myFileName.txt#L5', 'Invalid URL returned');
+	});
+
+	test('getGithubUrl - windows path file directly in project dir', function() {
+		let vsCodeMock = getVsCodeMock( {
+			line: 102,
+			projectDirectory: 'T:\foo',
+			filePath: 'bar.md'
+		} );
+		let url = main.getGithubUrl( vsCodeMock );
+
+		assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L103', 'Invalid URL returned');
 	});
 });
