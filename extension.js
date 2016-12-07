@@ -16,7 +16,11 @@ function activate(context) {
 
     // The code you place here will be executed every time your command is executed
     try {
-      copyPaste.copy(main.getGithubUrl(vscode));
+      var url = main.getGithubUrl(vscode);
+
+      if ( url ) {
+        copyPaste.copy( url );
+      }
     }
     catch (e) {
       console.log(e);
