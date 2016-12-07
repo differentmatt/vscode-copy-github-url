@@ -71,7 +71,8 @@ suite('main', function() {
       branch:'master',
       remote:'origin',
       url:'git@github.com:foo/bar-baz.git',
-      githubUrl:'https://github.com/foo/bar-baz'
+      githubUrl:'https://github.com/foo/bar-baz',
+      hash: '1a1433f'
     };
   }
 
@@ -108,8 +109,20 @@ suite('main', function() {
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L31-L41', 'Invalid URL returned');
   });
 
+  test('getGithubUrl - permalink', function() {
+    let vsCodeMock = getVsCodeMock( {
+      startLine: 0,
+      endLine: 1,
+      projectDirectory: 'T:\lorem',
+      filePath: 'ipsum.md'
+    } );
+    let url = main.getGithubUrl( vsCodeMock, true );
+
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/1a1433f/ipsum.md#L1-L2', 'Invalid URL returned');
+  });
+
   test('getGithubUrl - same active.line as end.line', function() {
-    // There might be a case, where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
+    // Tehere might be a case, where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
     let vsCodeMock = getVsCodeMock( {
       startLine: 1,
       endLine: 5,
