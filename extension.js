@@ -2,9 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 let vscode = require('vscode');
-let parseConfig = require('parse-git-config');
-let gitBranch = require('git-branch');
-let githubUrlFromGit = require('github-url-from-git');
+let main = require('./src/main');
 let copyPaste = require("copy-paste");
 
 // This method is called when your extension is activated
@@ -18,24 +16,10 @@ function activate(context) {
 
     // The code you place here will be executed every time your command is executed
     try {
-      let editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        console.error('No open text editor');
-        return;
-      }
-      let lineIndex = editor.selection.active.line + 1;
-      let cwd = vscode.workspace.rootPath;
-      let config = parseConfig.sync({cwd: cwd});
-      let branch = gitBranch.sync(cwd);
-      let remoteConfig = config[`branch "${branch}"`];
-      let remoteName = remoteConfig && remoteConfig.remote ? remoteConfig.remote : 'origin';
+      var url = main.getGithubUrl(vscode);
 
-      if (config[`remote "${remoteName}"`]) {
-        let githubRootUrl = githubUrlFromGit(config[`remote "${remoteName}"`].url);
-        let subdir = editor.document.fileName.substring(cwd.length);
-        let url = `${githubRootUrl}/blob/${branch}${subdir}#L${lineIndex}`;
-        url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
-        copyPaste.copy(url);
+      if ( url ) {
+        copyPaste.copy( url );
       }
     }
     catch (e) {
