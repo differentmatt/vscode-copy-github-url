@@ -18,6 +18,7 @@
     "engines": {
         "vscode": "0.10.x"
     },
+    "license": "MIT",
     "categories": [
         "Other",
         "Snippets"
@@ -45,7 +46,7 @@
         "postinstall": "node ./node_modules/vscode/bin/install"
     },
     "devDependencies": {
-        "vscode": "^0.10.11"
+        "vscode": "^0.11.x"
     },
     "dependencies": {
         "copy-paste": "^1.1.4",
