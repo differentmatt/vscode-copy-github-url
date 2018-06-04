@@ -5,18 +5,13 @@
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
 
-// The module 'assert' provides assertion methods from node
-let assert = require('assert');
+const assert = require('assert');
+const path = require('path');
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-let vscode = require('vscode');
-let myExtension = require('../extension');
-let main = require('../src/main');
-let path = require('path');
+const main = require('../src/main');
 
 // Defines a Mocha test suite to group tests of similar kind together
-suite('main', function() {
+suite('main', function () {
   /**
    * A helper function to return a vscode object imitation.
    *
@@ -27,25 +22,25 @@ suite('main', function() {
    * @param {String} [options.filePath] File path **relative to** `projectDirectory`.
    * @returns {Object} An `vscode` alike object.
    */
-  function getVsCodeMock( options ) {
+  function getVsCodeMock(options) {
     let editorMock = {
       selection: {
         active: {
-          line: options.startLine !== undefined ? options.startLine : 1
+          line: options.startLine !== undefined ? options.startLine : 1,
         },
         start: {
-          line: options.startLine !== undefined ? options.startLine : 1
+          line: options.startLine !== undefined ? options.startLine : 1,
         },
         end: {
-        }
+        },
       },
       document: {
-        fileName: options.filePath ? ( options.projectDirectory + path.sep + options.filePath ) :
-          'F:\\my\\workspace\\foo\\subdir1\\subdir2\\myFileName.txt'
-      }
+        fileName: options.filePath ? (options.projectDirectory + path.sep + options.filePath)
+          : 'F:\\my\\workspace\\foo\\subdir1\\subdir2\\myFileName.txt',
+      },
     };
 
-    if ( options.endLine !== undefined ) {
+    if (options.endLine !== undefined) {
       editorMock.selection.end.line = options.endLine;
     } else {
       // If endLine is unspecified just set it to the same as start line.
@@ -55,84 +50,84 @@ suite('main', function() {
     // And then we can determine if the selection is collapsed or not.
     editorMock.selection.isSingleLine = editorMock.selection.start.line == editorMock.selection.end.line;
 
-    return vsCodeMock = {
+    return {
       workspace: {
-        rootPath: options.projectDirectory || 'F:\\my\\workspace\\foo'
+        rootPath: options.projectDirectory || 'F:\\my\\workspace\\foo',
       },
       window: {
-        activeTextEditor: editorMock
-      }
+        activeTextEditor: editorMock,
+      },
     };
   }
 
-  main._getGitInfo = function( vscode ) {
+  main._getGitInfo = function () {
     // Stub the method to always have the same results.
     return {
-      branch:'master',
-      remote:'origin',
-      url:'git@github.com:foo/bar-baz.git',
-      githubUrl:'https://github.com/foo/bar-baz',
-      hash: '1a1433f'
+      branch: 'master',
+      remote: 'origin',
+      url: 'git@github.com:foo/bar-baz.git',
+      githubUrl: 'https://github.com/foo/bar-baz',
+      hash: '1a1433f',
     };
   }
 
-  test('getGithubUrl - windows path', function() {
-    let vsCodeMock = getVsCodeMock( {
-      startLine: 4
-    } );
-    let url = main.getGithubUrl( vsCodeMock );
+  test('getGithubUrl - windows path', function () {
+    let vsCodeMock = getVsCodeMock({
+      startLine: 4,
+    });
+    let url = main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/subdir1/subdir2/myFileName.txt#L5', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - windows path file directly in project dir', function() {
-    let vsCodeMock = getVsCodeMock( {
+  test('getGithubUrl - windows path file directly in project dir', function () {
+    let vsCodeMock = getVsCodeMock({
       startLine: 102,
       projectDirectory: 'T:\foo',
-      filePath: 'bar.md'
-    } );
-    let url = main.getGithubUrl( vsCodeMock );
+      filePath: 'bar.md',
+    });
+    let url = main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L103', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - ranged selection', function() {
+  test('getGithubUrl - ranged selection', function () {
     // Test a case when the selection is spanned across multiple lines.
-    let vsCodeMock = getVsCodeMock( {
+    let vsCodeMock = getVsCodeMock({
       startLine: 30,
       endLine: 40,
       projectDirectory: 'T:\foo',
-      filePath: 'bar.md'
-    } );
-    let url = main.getGithubUrl( vsCodeMock );
+      filePath: 'bar.md',
+    });
+    let url = main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L31-L41', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - permalink', function() {
-    let vsCodeMock = getVsCodeMock( {
+  test('getGithubUrl - permalink', function () {
+    let vsCodeMock = getVsCodeMock({
       startLine: 0,
       endLine: 1,
       projectDirectory: 'T:\lorem',
-      filePath: 'ipsum.md'
-    } );
-    let url = main.getGithubUrl( vsCodeMock, true );
+      filePath: 'ipsum.md',
+    });
+    let url = main.getGithubUrl(vsCodeMock, true);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/1a1433f/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - same active.line as end.line', function() {
+  test('getGithubUrl - same active.line as end.line', function () {
     // Tehere might be a case, where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
-    let vsCodeMock = getVsCodeMock( {
+    let vsCodeMock = getVsCodeMock({
       startLine: 1,
       endLine: 5,
       projectDirectory: 'T:\foo',
-      filePath: 'bar.md'
-    } );
+      filePath: 'bar.md',
+    });
 
     vsCodeMock.window.activeTextEditor.selection.active.line = 5;
 
-    let url = main.getGithubUrl( vsCodeMock );
+    let url = main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L2-L6', 'Invalid URL returned');
   });

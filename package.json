@@ -1,68 +1,68 @@
 {
-    "name": "copy-github-url",
-    "version": "0.1.0",
-    "publisher": "mattlott",
-    "displayName": "Copy GitHub URL",
-    "description": "Copy GitHub URL for current location to clipboard.",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/differentmatt/vscode-copy-github-url"
-    },
-    "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
-    "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
-    "icon": "images/icon.png",
-    "galleryBanner": {
-        "color": "#009933",
-        "theme": "dark"
-    },
-    "engines": {
-        "vscode": "0.10.x"
-    },
-    "license": "MIT",
-    "categories": [
-        "Other",
-        "Snippets"
+  "name": "copy-github-url",
+  "version": "0.1.0",
+  "publisher": "mattlott",
+  "displayName": "Copy GitHub URL",
+  "description": "Copy GitHub URL for current location to clipboard.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/differentmatt/vscode-copy-github-url"
+  },
+  "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
+  "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#009933",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "0.10.x"
+  },
+  "license": "MIT",
+  "categories": [
+    "Other",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onCommand:extension.gitHubUrl",
+    "onCommand:extension.gitHubUrlPerma"
+  ],
+  "main": "./extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.gitHubUrl",
+        "title": "Copy GitHub URL"
+      },
+      {
+        "command": "extension.gitHubUrlPerma",
+        "title": "Copy GitHub URL (Permalink)"
+      }
     ],
-    "activationEvents": [
-        "onCommand:extension.gitHubUrl",
-        "onCommand:extension.gitHubUrlPerma"
-    ],
-    "main": "./extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.gitHubUrl",
-                "title": "Copy GitHub URL"
-            },
-            {
-                "command": "extension.gitHubUrlPerma",
-                "title": "Copy GitHub URL (Permalink)"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "extension.gitHubUrl",
-                "key": "ctrl+l c",
-                "when": "editorTextFocus"
-            },
-            {
-                "command": "extension.gitHubUrlPerma",
-                "key": "ctrl+shift+l c",
-                "when": "editorTextFocus"
-            }
-        ]
-    },
-    "scripts": {
-        "postinstall": "node ./node_modules/vscode/bin/install"
-    },
-    "devDependencies": {
-        "vscode": "^0.11.x"
-    },
-    "dependencies": {
-        "copy-paste": "^1.1.4",
-        "git-branch": "^0.3.0",
-        "git-rev-sync": "^1.8.0",
-        "github-url-from-git": "^1.4.0",
-        "parse-git-config": "^0.3.2"
-    }
+    "keybindings": [
+      {
+        "command": "extension.gitHubUrl",
+        "key": "ctrl+l c",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "extension.gitHubUrlPerma",
+        "key": "ctrl+shift+l c",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "vscode": "^0.11.x"
+  },
+  "dependencies": {
+    "copy-paste": "^1.1.4",
+    "git-branch": "^0.3.0",
+    "git-rev-sync": "^1.8.0",
+    "github-url-from-git": "^1.4.0",
+    "parse-git-config": "^0.3.2"
+  }
 }
