@@ -59,7 +59,7 @@
     "vscode": "^0.11.x"
   },
   "dependencies": {
-    "copy-paste": "^1.1.4",
+    "clipboardy": "^1.2.3",
     "git-branch": "^0.3.0",
     "git-rev-sync": "^1.8.0",
     "github-url-from-git": "^1.4.0",

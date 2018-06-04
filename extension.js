@@ -1,6 +1,6 @@
 'use strict';
 
-const copyPaste = require('copy-paste');
+const clipboardy = require('clipboardy');
 const vscode = require('vscode');
 
 const main = require('./src/main');
@@ -14,12 +14,12 @@ function activate(context) {
         let url = main.getGithubUrl(vscode, isPermaLink);
 
         if (url) {
-          copyPaste.copy(url);
+          clipboardy.writeSync(url);
         }
       }
       catch (e) {
         console.log(e);
-        let errorMessage = 'GitHub Copy URL extension failed to copy.  See debug console for details.';
+        let errorMessage = 'GitHub Copy URL extension failed to copy. See debug console for details.';
         if (e.name && e.message) errorMessage = `(Copy GitHub URL) ${e.name}: ${e.message}`;
         vscode.window.showErrorMessage(errorMessage);
         return;
@@ -33,6 +33,8 @@ function activate(context) {
   let disposable = vscode.commands.registerCommand('extension.gitHubUrl', generateCommandBody(false));
   let permaDisposable = vscode.commands.registerCommand('extension.gitHubUrlPerma', generateCommandBody(true));
 
+  // Add to a list of disposables which are disposed when this extension is deactivated.
   context.subscriptions.push(disposable);
+  context.subscriptions.push(permaDisposable);
 }
 exports.activate = activate;
