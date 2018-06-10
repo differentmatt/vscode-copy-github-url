@@ -18,4 +18,3 @@ Example: [`https://github.com/differentmatt/vscode-copy-github-url/blob/c49dae32
 
 1. Within Visual Studio Code, open the command palette (`Ctrl-Shift-P` / `Cmd-Shift-P`)
 2. Type `install extension` and search for `copy github url`
-3. Linux only, `sudo apt-get install xclip`
