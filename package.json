@@ -50,7 +50,16 @@
                 "key": "ctrl+shift+l c",
                 "when": "editorTextFocus"
             }
-        ]
+        ],
+        "configuration": {
+            "title": "Copy github url configuration",
+            "properties": {
+                "rootGitFolder": {
+                    "type": "string",
+                    "description": "Provides the relative path to the folder that contains the .git folder for the current opened workspace"
+                }                
+            }
+        }
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install"
