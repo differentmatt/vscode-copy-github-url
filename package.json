@@ -1,6 +1,6 @@
 {
     "name": "copy-github-url",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "publisher": "mattlott",
     "displayName": "Copy GitHub URL",
     "description": "Copy GitHub URL for current location to clipboard.",
@@ -57,7 +57,7 @@
                 "rootGitFolder": {
                     "type": "string",
                     "description": "Provides the relative path to the folder that contains the .git folder for the current opened workspace"
-                }                
+                }
             }
         }
     },
