@@ -4,7 +4,7 @@ const gitBranch = require('git-branch');
 const githubUrlFromGit = require('github-url-from-git');
 const gitRevSync = require('git-rev-sync');
 const parseConfig = require('parse-git-config');
-
+const path =  require('path');
 module.exports = {
   /**
    * Returns a GitHub URL to the currently selected line in VSCode instance.
@@ -55,6 +55,16 @@ module.exports = {
   _getGitInfo: function (vscode, includeHash) {
     let cwd = vscode.workspace.rootPath;
     let config = parseConfig.sync({ cwd: cwd });
+    
+    if (!config) {
+      const vscodeConfig = vscode.workspace.getConfiguration('copyGithubUrl');
+      const rootGitFolder = (vscodeConfig || {}).rootGitFolder;
+
+      if (rootGitFolder) {
+        cwd = path.resolve(vscode.workspace.rootPath, rootGitFolder);
+        config = parseConfig.sync({ cwd: cwd });
+      }
+    }
     let branch = gitBranch.sync(cwd);
     let remoteConfig = config[`branch "${branch}"`];
     let remoteName = remoteConfig && remoteConfig.remote ? remoteConfig.remote : 'origin';
