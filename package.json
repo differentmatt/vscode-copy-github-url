@@ -1,6 +1,6 @@
 {
     "name": "copy-github-url",
-    "version": "0.2.0",
+    "version": "0.5.0",
     "publisher": "mattlott",
     "displayName": "Copy GitHub URL",
     "description": "Copy GitHub URL for current location to clipboard.",
@@ -80,7 +80,7 @@
     "dependencies": {
         "clipboardy": "^1.2.3",
         "git-branch": "^0.3.0",
-        "git-rev-sync": "^1.8.0",
+        "git-rev-sync": "^1.12.0",
         "github-url-from-git": "^1.4.0",
         "parse-git-config": "^0.3.2",
         "standard": "^14.3.1"
