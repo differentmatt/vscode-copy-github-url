@@ -8,10 +8,10 @@ const main = require('./src/main');
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
-  let generateCommandBody = (isPermaLink) => {
+  let generateCommandBody = (config) => {
     return () => {// The code you place here will be executed every time your command is executed
       try {
-        let url = main.getGithubUrl(vscode, isPermaLink);
+        let url = main.getGithubUrl(vscode, config);
 
         if (url) {
           clipboardy.writeSync(url);
@@ -30,8 +30,9 @@ function activate(context) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand('extension.gitHubUrl', generateCommandBody(false));
-  let permaDisposable = vscode.commands.registerCommand('extension.gitHubUrlPerma', generateCommandBody(true));
+  let disposable = vscode.commands.registerCommand('extension.gitHubUrl', generateCommandBody());
+  let permaDisposable = vscode.commands.registerCommand('extension.gitHubUrlPerma', generateCommandBody({perma:true}));
+  let masterDisposable = vscode.commands.registerCommand('extension.gitHubUrlMaster', generateCommandBody({perma:true, master:true}));
 
   // Add to a list of disposables which are disposed when this extension is deactivated.
   context.subscriptions.push(disposable);

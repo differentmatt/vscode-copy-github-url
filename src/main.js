@@ -14,7 +14,7 @@ module.exports = {
    * rather than branch.
    * @returns {String/null} Returns an URL or `null` if could not be determined.
    */
-  getGithubUrl: function (vscode, permalink) {
+  getGithubUrl: function (vscode, config) {
     let editor = vscode.window.activeTextEditor;
     let selection = editor.selection;
     if (!editor) {
@@ -30,9 +30,9 @@ module.exports = {
     }
 
     let cwd = vscode.workspace.rootPath;
-    let gitInfo = this._getGitInfo(vscode, permalink);
+    let gitInfo = this._getGitInfo(vscode, config.perma);
     let subdir = editor.document.fileName.substring(cwd.length);
-    let branch = permalink && gitInfo.hash ? gitInfo.hash : gitInfo.branch;
+    let branch = config.master ? 'master' : config.perma && gitInfo.hash ? gitInfo.hash : gitInfo.branch;
 
     let url = `${gitInfo.githubUrl}/blob/${branch}${subdir}#${lineQuery}`;
     url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
