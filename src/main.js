@@ -53,14 +53,14 @@ module.exports = {
    * @returns {String} [return.hash] A hash for the current repository. This property is available only if `includeHash` was set to `true`.
    */
   _getGitInfo: function (vscode, includeHash) {
-    let cwd = vscode.workspace.rootPath;
-    let config = parseConfig.sync({ cwd: cwd });
+    let cwd = vscode.workspace.rootPath
+    let config = parseConfig.sync({ cwd: cwd })
     
-    const vscodeConfig = vscode.workspace.getConfiguration('copyGithubUrl');
-    const gitUrl = vscodeConfig.get('gitUrl');
+    const vscodeConfig = vscode.workspace.getConfiguration('copyGithubUrl')
+    const gitUrl = vscodeConfig.get('gitUrl')
 
     if (!config) {
-      const rootGitFolder = vscodeConfig.get('rootGitFolder');
+      const rootGitFolder = vscodeConfig.get('rootGitFolder')
 
       if (rootGitFolder) {
         cwd = path.resolve(vscode.workspace.rootPath, rootGitFolder)
