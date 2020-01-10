@@ -1,10 +1,10 @@
-'use strict';
+'use strict'
 
-const gitBranch = require('git-branch');
-const githubUrlFromGit = require('github-url-from-git');
-const gitRevSync = require('git-rev-sync');
-const parseConfig = require('parse-git-config');
-const path =  require('path');
+const gitBranch = require('git-branch')
+const githubUrlFromGit = require('github-url-from-git')
+const gitRevSync = require('git-rev-sync')
+const parseConfig = require('parse-git-config')
+const path = require('path')
 module.exports = {
   /**
    * Returns a GitHub URL to the currently selected line in VSCode instance.
@@ -14,29 +14,29 @@ module.exports = {
    * rather than branch.
    * @returns {String/null} Returns an URL or `null` if could not be determined.
    */
-  getGithubUrl: function (vscode, permalink) {
-    let editor = vscode.window.activeTextEditor;
-    let selection = editor.selection;
+  getGithubUrl: function (vscode, config = {}) {
+    const editor = vscode.window.activeTextEditor
+    const selection = editor.selection
     if (!editor) {
-      console.error('No open text editor');
-      return null;
+      console.error('No open text editor')
+      return null
     }
 
-    let lineQuery = 'L' + (selection.start.line + 1);
+    let lineQuery = 'L' + (selection.start.line + 1)
 
     if (!selection.isSingleLine) {
       // Selection might be spanned across multiple lines.
-      lineQuery += ('-L' + (selection.end.line + 1));
+      lineQuery += ('-L' + (selection.end.line + 1))
     }
 
-    let cwd = vscode.workspace.rootPath;
-    let gitInfo = this._getGitInfo(vscode, permalink);
-    let subdir = editor.document.fileName.substring(cwd.length);
-    let branch = permalink && gitInfo.hash ? gitInfo.hash : gitInfo.branch;
+    const cwd = vscode.workspace.rootPath
+    const gitInfo = this._getGitInfo(vscode, config.perma)
+    const subdir = editor.document.fileName.substring(cwd.length)
+    const branch = config.master ? 'master' : config.perma && gitInfo.hash ? gitInfo.hash : gitInfo.branch
 
-    let url = `${gitInfo.githubUrl}/blob/${branch}${subdir}#${lineQuery}`;
-    url = url.replace(/\\/g, '/'); // Flip subdir slashes on Windows
-    return url;
+    let url = `${gitInfo.githubUrl}/blob/${branch}${subdir}#${lineQuery}`
+    url = url.replace(/\\/g, '/') // Flip subdir slashes on Windows
+    return url
   },
 
   /**
@@ -63,16 +63,16 @@ module.exports = {
       const rootGitFolder = vscodeConfig.get('rootGitFolder');
 
       if (rootGitFolder) {
-        cwd = path.resolve(vscode.workspace.rootPath, rootGitFolder);
-        config = parseConfig.sync({ cwd: cwd });
+        cwd = path.resolve(vscode.workspace.rootPath, rootGitFolder)
+        config = parseConfig.sync({ cwd: cwd })
       }
     }
-    let branch = gitBranch.sync(cwd);
-    let remoteConfig = config[`branch "${branch}"`];
-    let remoteName = remoteConfig && remoteConfig.remote ? remoteConfig.remote : 'origin';
+    const branch = gitBranch.sync(cwd)
+    const remoteConfig = config[`branch "${branch}"`]
+    const remoteName = remoteConfig && remoteConfig.remote ? remoteConfig.remote : 'origin'
 
     if (!config[`remote "${remoteName}"`]) {
-      throw new Error(`Could not fetch information about "${remoteName}" remote.`);
+      throw new Error(`Could not fetch information about "${remoteName}" remote.`)
     }
 
     return {
@@ -81,7 +81,7 @@ module.exports = {
       url: config[`remote "${remoteName}"`].url, // An URL to git repository itself.
       githubUrl: githubUrlFromGit(config[`remote "${remoteName}"`].url, gitUrl && {extraBaseUrls: [gitUrl]}), // An URL to the GitHub page for given repository.
       // Include hash only on demand as it might be a costy operation.
-      hash: includeHash ? gitRevSync.short(cwd) : null,
-    };
-  },
-};
+      hash: includeHash ? gitRevSync.short(cwd) : null
+    }
+  }
+}
