@@ -64,9 +64,13 @@
         "configuration": {
             "title": "Copy github url configuration",
             "properties": {
-                "rootGitFolder": {
+                "copyGithubUrl.rootGitFolder": {
                     "type": "string",
                     "description": "Provides the relative path to the folder that contains the .git folder for the current opened workspace"
+                },
+                "copyGithubUrl.gitUrl": {
+                    "type": "string",
+                    "description": "The github domain. Eg: github.example.com"
                 }
             }
         }

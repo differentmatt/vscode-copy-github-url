@@ -55,10 +55,12 @@ module.exports = {
   _getGitInfo: function (vscode, includeHash) {
     let cwd = vscode.workspace.rootPath
     let config = parseConfig.sync({ cwd: cwd })
+    
+    const vscodeConfig = vscode.workspace.getConfiguration('copyGithubUrl')
+    const gitUrl = vscodeConfig.get('gitUrl')
 
     if (!config) {
-      const vscodeConfig = vscode.workspace.getConfiguration('copyGithubUrl')
-      const rootGitFolder = (vscodeConfig || {}).rootGitFolder
+      const rootGitFolder = vscodeConfig.get('rootGitFolder')
 
       if (rootGitFolder) {
         cwd = path.resolve(vscode.workspace.rootPath, rootGitFolder)
@@ -77,7 +79,7 @@ module.exports = {
       branch: branch,
       remote: remoteName,
       url: config[`remote "${remoteName}"`].url, // An URL to git repository itself.
-      githubUrl: githubUrlFromGit(config[`remote "${remoteName}"`].url), // An URL to the GitHub page for given repository.
+      githubUrl: githubUrlFromGit(config[`remote "${remoteName}"`].url, gitUrl && {extraBaseUrls: [gitUrl]}), // An URL to the GitHub page for given repository.
       // Include hash only on demand as it might be a costy operation.
       hash: includeHash ? gitRevSync.short(cwd) : null
     }
