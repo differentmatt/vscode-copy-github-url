@@ -1,6 +1,6 @@
 {
     "name": "copy-github-url",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "publisher": "mattlott",
     "displayName": "Copy GitHub URL",
     "description": "Copy GitHub URL for current location to clipboard.",
