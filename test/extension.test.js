@@ -63,7 +63,7 @@ suite('main', function () {
   main._getGitInfo = function () {
     // Stub the method to always have the same results.
     return {
-      branch: 'master',
+      branch: 'test-branch',
       remote: 'origin',
       url: 'git@github.com:foo/bar-baz.git',
       githubUrl: 'https://github.com/foo/bar-baz',
@@ -77,7 +77,7 @@ suite('main', function () {
     });
     let url = main.getGithubUrl(vsCodeMock);
 
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/subdir1/subdir2/myFileName.txt#L5', 'Invalid URL returned');
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5', 'Invalid URL returned');
   });
 
   test('getGithubUrl - windows path file directly in project dir', function () {
@@ -88,7 +88,7 @@ suite('main', function () {
     });
     let url = main.getGithubUrl(vsCodeMock);
 
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L103', 'Invalid URL returned');
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L103', 'Invalid URL returned');
   });
 
   test('getGithubUrl - ranged selection', function () {
@@ -101,7 +101,19 @@ suite('main', function () {
     });
     let url = main.getGithubUrl(vsCodeMock);
 
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L31-L41', 'Invalid URL returned');
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L31-L41', 'Invalid URL returned');
+  });
+
+  test('getGithubUrl - current link', function () {
+    let vsCodeMock = getVsCodeMock({
+      startLine: 0,
+      endLine: 1,
+      projectDirectory: 'T:\lorem',
+      filePath: 'ipsum.md',
+    });
+    let url = main.getGithubUrl(vsCodeMock);
+
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
   test('getGithubUrl - permalink', function () {
@@ -111,9 +123,21 @@ suite('main', function () {
       projectDirectory: 'T:\lorem',
       filePath: 'ipsum.md',
     });
-    let url = main.getGithubUrl(vsCodeMock, true);
+    let url = main.getGithubUrl(vsCodeMock, { perma: true });
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/1a1433f/ipsum.md#L1-L2', 'Invalid URL returned');
+  });
+
+  test('getGithubUrl - master link', function () {
+    let vsCodeMock = getVsCodeMock({
+      startLine: 0,
+      endLine: 1,
+      projectDirectory: 'T:\lorem',
+      filePath: 'ipsum.md',
+    });
+    let url = main.getGithubUrl(vsCodeMock, { master: true });
+
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
   test('getGithubUrl - same active.line as end.line', function () {
@@ -129,6 +153,6 @@ suite('main', function () {
 
     let url = main.getGithubUrl(vsCodeMock);
 
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/bar.md#L2-L6', 'Invalid URL returned');
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L2-L6', 'Invalid URL returned');
   });
 });

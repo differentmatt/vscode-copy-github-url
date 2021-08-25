@@ -16,7 +16,7 @@
         "theme": "dark"
     },
     "engines": {
-        "vscode": "0.10.x"
+        "vscode": "^1.32.0"
     },
     "license": "MIT",
     "categories": [
@@ -76,17 +76,27 @@
         }
     },
     "scripts": {
-        "postinstall": "node ./node_modules/vscode/bin/install"
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"test": "node ./test/runTest.js"
     },
     "devDependencies": {
-        "vscode": "^0.11.x"
+        "@types/vscode": "^1.59.0",
+        "@types/glob": "^7.1.4",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "16.x",
+        "eslint": "^7.32.0",
+        "glob": "^7.1.7",
+        "mocha": "^9.1.0",
+        "typescript": "^4.3.5",
+        "vscode-test": "^1.6.1"
     },
     "dependencies": {
-        "clipboardy": "^1.2.3",
-        "git-branch": "^0.3.0",
-        "git-rev-sync": "^1.12.0",
-        "github-url-from-git": "^1.4.0",
-        "parse-git-config": "^0.3.2",
-        "standard": "^14.3.1"
+        "clipboardy": "^2.3.0",
+        "git-branch": "^2.0.1",
+        "git-rev-sync": "^3.0.1",
+        "github-url-from-git": "^1.5.0",
+        "parse-git-config": "^3.0.0",
+        "standard": "^16.0.3"
     }
 }

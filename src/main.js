@@ -54,12 +54,12 @@ module.exports = {
    */
   _getGitInfo: function (vscode, includeHash) {
     let cwd = vscode.workspace.rootPath
-    let config = parseConfig.sync({ cwd: cwd })
-    
+    let config = parseConfig.sync({ cwd: cwd, path: '.git/config' })
+
     const vscodeConfig = vscode.workspace.getConfiguration('copyGithubUrl')
     const gitUrl = vscodeConfig.get('gitUrl')
 
-    if (!config) {
+    if (Object.keys(config || {}).length === 0) {
       const rootGitFolder = vscodeConfig.get('rootGitFolder')
 
       if (rootGitFolder) {
