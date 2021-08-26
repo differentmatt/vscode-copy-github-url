@@ -16,7 +16,7 @@
         "theme": "dark"
     },
     "engines": {
-        "vscode": "^1.32.0"
+        "vscode": "^1.59.0"
     },
     "license": "MIT",
     "categories": [
@@ -76,9 +76,9 @@
         }
     },
     "scripts": {
-		"lint": "eslint .",
-		"pretest": "npm run lint",
-		"test": "node ./test/runTest.js"
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "node ./test/runTest.js"
     },
     "devDependencies": {
         "@types/vscode": "^1.59.0",
