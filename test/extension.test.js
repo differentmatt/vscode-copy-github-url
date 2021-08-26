@@ -67,7 +67,7 @@ suite('main', function () {
       remote: 'origin',
       url: 'git@github.com:foo/bar-baz.git',
       githubUrl: 'https://github.com/foo/bar-baz',
-      hash: '1a1433f',
+      hash: '75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef',
     };
   }
 
@@ -125,7 +125,7 @@ suite('main', function () {
     });
     let url = main.getGithubUrl(vsCodeMock, { perma: true });
 
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/1a1433f/ipsum.md#L1-L2', 'Invalid URL returned');
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
   test('getGithubUrl - master link', function () {
