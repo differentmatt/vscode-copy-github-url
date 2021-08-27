@@ -14,9 +14,9 @@ Usage: `Ctrl+Shift+L C`
 
 Example: [`https://github.com/differentmatt/vscode-copy-github-url/blob/c49dae32/extension.js#L4`](https://github.com/differentmatt/vscode-copy-github-url/blob/c49dae32/extension.js#L4)
 
-# Copy GitHub URL Master
+# Copy GitHub URL Default Branch
 
-Copy a GitHub master branch URL of your current file location to the clipboard.
+Copy a GitHub default branch URL of your current file location to the clipboard.
 
 Usage: `Ctrl+Shift+L M`
 

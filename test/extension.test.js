@@ -52,12 +52,18 @@ suite('main', function () {
 
     return {
       workspace: {
-        rootPath: options.projectDirectory || 'F:\\my\\workspace\\foo',
+        rootPath: options.projectDirectory || 'F:\\my\\workspace\\foo'
       },
       window: {
         activeTextEditor: editorMock,
       },
     };
+  }
+
+  main._getVscodeConfig = () => {}
+
+  main._getGitConfig = function (vscode) {
+    return { cwd: vscode.workspace.rootPath }
   }
 
   main._getGitInfo = function () {
@@ -66,32 +72,39 @@ suite('main', function () {
       branch: 'test-branch',
       remote: 'origin',
       url: 'git@github.com:foo/bar-baz.git',
-      githubUrl: 'https://github.com/foo/bar-baz',
-      hash: '75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef',
+      githubUrl: 'https://github.com/foo/bar-baz'
     };
   }
 
-  test('getGithubUrl - windows path', function () {
+  main._getDefaultBranch = async function () {
+    return new Promise((c) => {
+      c('main')
+    })
+  }
+
+  main._getGitLongHash = () => '75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef'
+
+  test('getGithubUrl - windows path', async function () {
     let vsCodeMock = getVsCodeMock({
       startLine: 4,
     });
-    let url = main.getGithubUrl(vsCodeMock);
+    let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - windows path file directly in project dir', function () {
+  test('getGithubUrl - windows path file directly in project dir', async function () {
     let vsCodeMock = getVsCodeMock({
       startLine: 102,
       projectDirectory: 'T:\foo',
       filePath: 'bar.md',
     });
-    let url = main.getGithubUrl(vsCodeMock);
+    let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L103', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - ranged selection', function () {
+  test('getGithubUrl - ranged selection', async function () {
     // Test a case when the selection is spanned across multiple lines.
     let vsCodeMock = getVsCodeMock({
       startLine: 30,
@@ -99,48 +112,48 @@ suite('main', function () {
       projectDirectory: 'T:\foo',
       filePath: 'bar.md',
     });
-    let url = main.getGithubUrl(vsCodeMock);
+    let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L31-L41', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - current link', function () {
+  test('getGithubUrl - current link', async function () {
     let vsCodeMock = getVsCodeMock({
       startLine: 0,
       endLine: 1,
       projectDirectory: 'T:\lorem',
       filePath: 'ipsum.md',
     });
-    let url = main.getGithubUrl(vsCodeMock);
+    let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - permalink', function () {
+  test('getGithubUrl - permalink', async function () {
     let vsCodeMock = getVsCodeMock({
       startLine: 0,
       endLine: 1,
       projectDirectory: 'T:\lorem',
       filePath: 'ipsum.md',
     });
-    let url = main.getGithubUrl(vsCodeMock, { perma: true });
+    let url = await main.getGithubUrl(vsCodeMock, { perma: true });
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - master link', function () {
+  test('getGithubUrl - default link', async function () {
     let vsCodeMock = getVsCodeMock({
       startLine: 0,
       endLine: 1,
       projectDirectory: 'T:\lorem',
       filePath: 'ipsum.md',
     });
-    let url = main.getGithubUrl(vsCodeMock, { master: true });
+    let url = await main.getGithubUrl(vsCodeMock, { default: true });
 
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/master/ipsum.md#L1-L2', 'Invalid URL returned');
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/main/ipsum.md#L1-L2', 'Invalid URL returned');
   });
 
-  test('getGithubUrl - same active.line as end.line', function () {
+  test('getGithubUrl - same active.line as end.line', async function () {
     // Tehere might be a case, where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
     let vsCodeMock = getVsCodeMock({
       startLine: 1,
@@ -151,7 +164,7 @@ suite('main', function () {
 
     vsCodeMock.window.activeTextEditor.selection.active.line = 5;
 
-    let url = main.getGithubUrl(vsCodeMock);
+    let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L2-L6', 'Invalid URL returned');
   });

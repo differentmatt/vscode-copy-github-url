@@ -26,7 +26,7 @@
     "activationEvents": [
         "onCommand:extension.gitHubUrl",
         "onCommand:extension.gitHubUrlPerma",
-        "onCommand:extension.gitHubUrlMaster"
+        "onCommand:extension.gitHubUrlDefault"
     ],
     "main": "./extension",
     "contributes": {
@@ -40,7 +40,7 @@
                 "title": "Copy GitHub URL (Permalink)"
             },
             {
-                "command": "extension.gitHubUrlMaster",
+                "command": "extension.gitHubUrlDefault",
                 "title": "Copy GitHub URL (Master)"
             }
         ],
@@ -56,7 +56,7 @@
                 "when": "editorTextFocus"
             },
             {
-                "command": "extension.gitHubUrlMaster",
+                "command": "extension.gitHubUrlDefault",
                 "key": "ctrl+shift+l m",
                 "when": "editorTextFocus"
             }
@@ -81,10 +81,10 @@
         "test": "node ./test/runTest.js"
     },
     "devDependencies": {
-        "@types/vscode": "^1.59.0",
         "@types/glob": "^7.1.4",
         "@types/mocha": "^9.0.0",
         "@types/node": "16.x",
+        "@types/vscode": "^1.59.0",
         "eslint": "^7.32.0",
         "glob": "^7.1.7",
         "mocha": "^9.1.0",
@@ -93,6 +93,7 @@
     },
     "dependencies": {
         "clipboardy": "^2.3.0",
+        "default-branch": "^1.1.0",
         "git-branch": "^2.0.1",
         "git-rev-sync": "^3.0.1",
         "github-url-from-git": "^1.5.0",
