@@ -64,13 +64,17 @@
         "configuration": {
             "title": "Copy github url configuration",
             "properties": {
-                "copyGithubUrl.rootGitFolder": {
+                "copyGithubUrl.defaultBranchFallback": {
                     "type": "string",
-                    "description": "Provides the relative path to the folder that contains the .git folder for the current opened workspace"
+                    "description": "Default branch name to use if it cannot be determined dynamically"
                 },
                 "copyGithubUrl.gitUrl": {
                     "type": "string",
                     "description": "The github domain. Eg: github.example.com"
+                },
+                "copyGithubUrl.rootGitFolder": {
+                    "type": "string",
+                    "description": "Provides the relative path to the folder that contains the .git folder for the current opened workspace"
                 }
             }
         }

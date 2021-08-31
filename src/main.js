@@ -34,7 +34,7 @@ module.exports = {
     const {cwd, gitConfig} = this._getGitConfig(vscode, vscodeConfig)
     const gitInfo = this._getGitInfo(cwd, vscodeConfig, gitConfig)
 
-    const branch = config.default ? await this._getDefaultBranch(gitInfo.githubUrl) : config.perma ? this._getGitLongHash(cwd) : gitInfo.branch
+    const branch = config.default ? await this._getDefaultBranch(gitInfo.githubUrl, vscodeConfig) : config.perma ? this._getGitLongHash(cwd) : gitInfo.branch
 
     const subdir = editor.document.fileName.substring(cwd.length)
     let url = `${gitInfo.githubUrl}/blob/${branch}${subdir}#${lineQuery}`
@@ -110,11 +110,13 @@ module.exports = {
    * @param {String} githubUrl
    * @returns {String}
    */
-   _getDefaultBranch: async function (githubUrl) {
+   _getDefaultBranch: async function (githubUrl, vscodeConfig) {
       try {
         return await gitDefaultBranch(githubUrl)
       } catch (e) {
-        // Maybe private repo, using GitHub default
+        // Maybe private repo, use configured value or GitHub default
+        const defaultBranch = vscodeConfig.get('defaultBranchFallback')
+        if (defaultBranch) return defaultBranch
         return 'main'
       }
    },
