@@ -28,7 +28,7 @@
         "onCommand:extension.gitHubUrlPerma",
         "onCommand:extension.gitHubUrlDefault"
     ],
-    "main": "./extension",
+    "main": "./dist/extension",
     "contributes": {
         "commands": [
             {
@@ -80,6 +80,9 @@
         }
     },
     "scripts": {
+        "vscode:prepublish": "webpack --mode production",
+        "webpack": "webpack --mode development",
+        "webpack-dev": "webpack --mode development --watch",
         "lint": "eslint .",
         "pretest": "npm run lint",
         "test": "node ./test/runTest.js"
@@ -93,7 +96,9 @@
         "glob": "^7.1.7",
         "mocha": "^9.1.0",
         "typescript": "^4.3.5",
-        "vscode-test": "^1.6.1"
+        "vscode-test": "^1.6.1",
+        "webpack": "^5.52.0",
+        "webpack-cli": "^4.8.0"
     },
     "dependencies": {
         "clipboardy": "^2.3.0",

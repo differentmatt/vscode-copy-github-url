@@ -5,3 +5,7 @@ test/**
 .gitignore
 jsconfig.json
 vsc-extension-quickstart.md
+node_modules
+src/
+webpack.config.js
+jsconfig.json

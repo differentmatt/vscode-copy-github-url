@@ -6,6 +6,7 @@
       "name": "Launch Extension",
       "type": "extensionHost",
       "request": "launch",
+      "program": "./dist/extension.js",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ]
