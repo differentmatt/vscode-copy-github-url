@@ -2,6 +2,7 @@
 
 const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin");
+const PermissionsOutputPlugin = require('webpack-permissions-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -28,9 +29,20 @@ const config = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: "node_modules/clipboardy/fallbacks", to: "fallbacks" }
+        // clipboardy looks for fallback executables in <extension folder>/fallbacks/..
+        // TODO: Better way to get this folder in the correct location in a packaged extension?
+        { from: "node_modules/clipboardy/fallbacks", to: "../fallbacks" }
       ],
     }),
-  ],
+    new PermissionsOutputPlugin({
+      buildFolders: [
+        {
+          path: path.resolve(__dirname, 'fallbacks/'),
+          fileMode: '555',
+          dirMode: '555'
+        }
+      ]
+    })
+  ]
 };
 module.exports = config;
