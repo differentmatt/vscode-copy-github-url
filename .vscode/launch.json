@@ -6,7 +6,8 @@
       "name": "Launch Extension",
       "type": "extensionHost",
       "request": "launch",
-      "program": "./dist/extension.js",
+      "preLaunchTask": "npm: webpack",
+      "runtimeExecutable": "${workspaceFolder}/dist/extension.js",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ]
