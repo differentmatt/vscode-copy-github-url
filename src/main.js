@@ -12,6 +12,7 @@ module.exports = {
    *
    * @param {mixed} vscode
    * @param {Boolean} [permalink=false] Should it be permalink? If `true` it will link to current revision hash
+   * @param {string} [platform=process.platform] The platform to determine the path separator. The default value is `process.platform`.
    * rather than branch.
    * @returns {String/null} Returns an URL or `null` if could not be determined.
    */
@@ -37,8 +38,19 @@ module.exports = {
     const branch = config.default ? await this._getDefaultBranch(gitInfo.githubUrl, vscodeConfig) : config.perma ? this._getGitLongHash(cwd) : gitInfo.branch
 
     const subdir = editor.document.fileName.substring(cwd.length)
-    let url = `${gitInfo.githubUrl}/blob/${branch}${subdir}#${lineQuery}`
-    url = url.replace(/\\/g, '/') // Flip subdir slashes on Windows
+
+    // Determine the path separator by using platform.
+    // Note: The config.platform overrides process.platform for easy to test.
+    let pathSeparator = ''
+    if(config.platform === 'win32' || (!config.platform && process.platform === 'win32')) {
+      pathSeparator = '\\'
+    } else {
+      pathSeparator = '/'
+    }
+    // If the file contains symbols, we need to encode by using encodeURI function.
+    // Additionally `#` and `?` in the pathname should be replaced with `%23` and `%3F` respectively.
+    const subdirEncoded = subdir.split(pathSeparator).map((p) => encodeURI(p).replace('#', '%23').replace('?', '%3F')).join('/')
+    let url = `${gitInfo.githubUrl}/blob/${branch}${subdirEncoded}#${lineQuery}`;
     return url
   },
 
