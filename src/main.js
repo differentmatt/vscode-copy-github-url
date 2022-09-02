@@ -39,14 +39,8 @@ module.exports = {
 
     const subdir = editor.document.fileName.substring(cwd.length)
 
-    // Determine the path separator by using platform.
-    // Note: The config.platform overrides process.platform for easy to test.
-    let pathSeparator = ''
-    if(config.platform === 'win32' || (!config.platform && process.platform === 'win32')) {
-      pathSeparator = '\\'
-    } else {
-      pathSeparator = '/'
-    }
+    let pathSeparator = config.pathSeparator || path.sep;
+
     // If the file contains symbols, we need to encode by using encodeURI function.
     // Additionally `#` and `?` in the pathname should be replaced with `%23` and `%3F` respectively.
     const subdirEncoded = subdir.split(pathSeparator).map((p) => encodeURI(p).replace('#', '%23').replace('?', '%3F')).join('/')
