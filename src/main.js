@@ -12,7 +12,6 @@ module.exports = {
    *
    * @param {mixed} vscode
    * @param {Boolean} [permalink=false] Should it be permalink? If `true` it will link to current revision hash
-   * @param {string} [platform=process.platform] The platform to determine the path separator. The default value is `process.platform`.
    * rather than branch.
    * @returns {String/null} Returns an URL or `null` if could not be determined.
    */

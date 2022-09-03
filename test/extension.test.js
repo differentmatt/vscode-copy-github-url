@@ -164,7 +164,7 @@ suite('main', function () {
 
     vsCodeMock.window.activeTextEditor.selection.active.line = 5;
 
-    let url = await main.getGithubUrl(vsCodeMock, { platform: 'win32' });
+    let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L2-L6', 'Invalid URL returned');
   });
