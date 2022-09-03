@@ -12,6 +12,7 @@ module.exports = {
    *
    * @param {mixed} vscode
    * @param {Boolean} [permalink=false] Should it be permalink? If `true` it will link to current revision hash
+   * @param {string} [pathSeparator] A path separator (Default value is the returned value from path.sep)
    * rather than branch.
    * @returns {String/null} Returns an URL or `null` if could not be determined.
    */
