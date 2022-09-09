@@ -88,7 +88,7 @@ suite('main', function () {
     let vsCodeMock = getVsCodeMock({
       startLine: 4,
     });
-    let url = await main.getGithubUrl(vsCodeMock);
+    let url = await main.getGithubUrl(vsCodeMock, { pathSeparator: '\\' });
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5', 'Invalid URL returned');
   });
@@ -148,7 +148,7 @@ suite('main', function () {
       projectDirectory: 'T:\lorem',
       filePath: 'ipsum.md',
     });
-    let url = await main.getGithubUrl(vsCodeMock, { default: true });
+    let url = await main.getGithubUrl(vsCodeMock, { default: true});
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/main/ipsum.md#L1-L2', 'Invalid URL returned');
   });
@@ -167,5 +167,29 @@ suite('main', function () {
     let url = await main.getGithubUrl(vsCodeMock);
 
     assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L2-L6', 'Invalid URL returned');
+  });
+
+  test('getGithubUrl - permalink for a file that contains symbols on macOS', async function () {
+    let vsCodeMock = getVsCodeMock({
+      startLine: 0,
+      endLine: 1,
+      projectDirectory: '/foo',
+      filePath: 'a !"#$%&\'()*+,-.:;<=>?@[\\]^`{|}~.md',
+    });
+    let url = await main.getGithubUrl(vsCodeMock, { perma: true, pathSeparator: '/'});
+
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/a%20!%22%23$%25&\'()*+,-.:;%3C=%3E%3F@%5B%5C%5D%5E%60%7B%7C%7D~.md#L1-L2', 'Invalid URL returned');
+  });
+
+  test('getGithubUrl - permalink for a file that contains symbols with \\ pathSeparator', async function () {
+    let vsCodeMock = getVsCodeMock({
+      startLine: 0,
+      endLine: 1,
+      projectDirectory: 'T:\foo',
+      filePath: 'a !"#$%&\'()*+,-.:;<=>?@[\\]^`{|}~.md',
+    });
+    let url = await main.getGithubUrl(vsCodeMock, { perma: true, pathSeparator: '\\' });
+
+    assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/a%20!%22%23$%25&\'()*+,-.:;%3C=%3E%3F@%5B/%5D%5E%60%7B%7C%7D~.md#L1-L2', 'Invalid URL returned');
   });
 });
