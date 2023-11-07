@@ -32,7 +32,8 @@ module.exports = {
     }
 
     const vscodeConfig = this._getVscodeConfig(vscode)
-    const {cwd, gitConfig} = this._getGitConfig(vscode, vscodeConfig)
+    const cwd = this._getCwd(vscode, editor);
+    const gitConfig = this._getGitConfig(cwd, vscode, vscodeConfig)
     const gitInfo = this._getGitInfo(cwd, vscodeConfig, gitConfig)
 
     const branch = config.default ? await this._getDefaultBranch(gitInfo.githubUrl, vscodeConfig) : config.perma ? this._getGitLongHash(cwd) : gitInfo.branch
@@ -49,6 +50,7 @@ module.exports = {
   },
 
    _getVscodeConfig: (vscode) => vscode.workspace.getConfiguration('copyGithubUrl'),
+   _getCwd: (vscode, editor) => vscode.workspace.getWorkspaceFolder(editor.document.uri).uri.path,
 
   /**
    * Returns git config and cwd for given vscode and vscode config
@@ -60,19 +62,18 @@ module.exports = {
    * @returns {Object} return.cwd
    * @returns {Object} return.gitConfig
   */
-   _getGitConfig: function (vscode, vscodeConfig) {
-    let cwd = vscode.workspace.rootPath
+   _getGitConfig: function (cwd, vscode, vscodeConfig) {
     let gitConfig = parseConfig.sync({ cwd: cwd, path: '.git/config' })
 
     if (Object.keys(gitConfig || {}).length === 0) {
       const rootGitFolder = vscodeConfig.get('rootGitFolder')
 
       if (rootGitFolder) {
-        cwd = path.resolve(vscode.workspace.rootPath, rootGitFolder)
+        cwd = path.resolve(cwd, rootGitFolder)
         gitConfig = parseConfig.sync({ cwd: cwd })
       }
     }
-    return {cwd, gitConfig}
+    return gitConfig
   },
 
   /**
