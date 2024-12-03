@@ -23,11 +23,6 @@
         "Other",
         "Snippets"
     ],
-    "activationEvents": [
-        "onCommand:extension.gitHubUrl",
-        "onCommand:extension.gitHubUrlPerma",
-        "onCommand:extension.gitHubUrlDefault"
-    ],
     "main": "./dist/extension",
     "contributes": {
         "commands": [
