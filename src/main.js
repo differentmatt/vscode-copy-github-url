@@ -10,11 +10,9 @@ module.exports = {
   /**
    * Returns a GitHub URL to the currently selected line in VSCode instance.
    *
-   * @param {mixed} vscode
-   * @param {Boolean} [permalink=false] Should it be permalink? If `true` it will link to current revision hash
-   * @param {string} [pathSeparator] A path separator (Default value is the returned value from path.sep)
-   * rather than branch.
-   * @returns {String/null} Returns an URL or `null` if could not be determined.
+   * @param {Object} vscode
+   * @param {Object} [config={}]
+   * @returns {Promise<string|null>} Returns an URL or `null` if could not be determined.
    */
   getGithubUrl: async function (vscode, config = {}) {
     const editor = vscode.window.activeTextEditor
@@ -56,13 +54,13 @@ module.exports = {
    * Returns git config and cwd for given vscode and vscode config
    *
    * @private
-   * @param {mixed} vscode
+   * @param {Object} vscode
    * @param {Object} vscodeConfig
    * @returns {Object} return
    * @returns {Object} return.cwd
    * @returns {Object} return.gitConfig
   */
-   _getGitConfig: function (cwd, vscode, vscodeConfig) {
+  _getGitConfig: function (cwd, vscode, vscodeConfig) {
     let gitConfig = parseConfig.sync({ cwd: cwd, path: '.git/config' })
 
     if (Object.keys(gitConfig || {}).length === 0) {
@@ -83,11 +81,12 @@ module.exports = {
    * @param {String} cwd
    * @param {Object} vscodeConfig
    * @param {Object} gitConfig
-   * @returns {Object} return
-   * @returns {String} return.branch Current branch name.
-   * @returns {String} return.remote Currently set upstream, will fallback to 'origin' if none set.
-   * @returns {String} return.url URL to a Git repository.
-   * @returns {String} return.githubUrl URL to a GitHub page for given repository.
+   * @returns {{
+   *   branch: String,  // Current branch name
+   *   remote: String,  // Currently set upstream, will fallback to 'origin' if none set
+   *   url: String,     // URL to a Git repository
+   *   githubUrl: String // URL to a GitHub page for given repository
+   * }}
    */
   _getGitInfo: function (cwd, vscodeConfig, gitConfig) {
     const gitUrl = vscodeConfig.get('gitUrl')
@@ -115,7 +114,8 @@ module.exports = {
    *
    * @private
    * @param {String} githubUrl
-   * @returns {String}
+   * @param {Object} vscodeConfig
+   * @returns {Promise<string>}
    */
    _getDefaultBranch: async function (githubUrl, vscodeConfig) {
       try {

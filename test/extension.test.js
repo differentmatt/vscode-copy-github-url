@@ -1,8 +1,7 @@
 /* global suite, test */
 
 //
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
+// See Mocha documentation on https://mochajs.org/ for help.
 //
 
 const assert = require('assert');
@@ -156,7 +155,7 @@ suite('main', function () {
   });
 
   test('getGithubUrl - same active.line as end.line', async function () {
-    // Tehere might be a case, where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
+    // NOTE: There might be a case where selection.active.line will be the same as selection.end.line. It caused a problem at one point.
     let vsCodeMock = getVsCodeMock({
       startLine: 1,
       endLine: 5,

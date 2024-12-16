@@ -23,11 +23,6 @@
         "Other",
         "Snippets"
     ],
-    "activationEvents": [
-        "onCommand:extension.gitHubUrl",
-        "onCommand:extension.gitHubUrlPerma",
-        "onCommand:extension.gitHubUrlDefault"
-    ],
     "main": "./dist/extension",
     "contributes": {
         "commands": [
@@ -99,7 +94,7 @@
         "tape": "^5.9.0",
         "typescript": "^4.3.5",
         "vscode-test": "^1.6.1",
-        "webpack": "^5.52.0",
+        "webpack": "^5.97.1",
         "webpack-cli": "^4.8.0",
         "webpack-permissions-plugin": "^1.0.8"
     },
