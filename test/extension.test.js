@@ -51,7 +51,7 @@ suite('main', function () {
 
     return {
       workspace: {
-        rootPath: options.projectDirectory || 'F:\\my\\workspace\\foo'
+        workspaceFolders: [{ uri: { path: options.projectDirectory || 'F:\\my\\workspace\\foo' } }]
       },
       window: {
         activeTextEditor: editorMock,
@@ -61,11 +61,10 @@ suite('main', function () {
 
   main._getVscodeConfig = () => {}
 
-  main._getGitConfig = function (vscode) {
-    return {
-      cwd: vscode.workspace.rootPath,
-      gitConfig: {}
-    }
+  main._getCwd = (vscode, editor) => vscode.workspace.workspaceFolders[0].uri.path;
+
+  main._getGitConfig = function (cwd) {
+    return { cwd: cwd }
   }
 
   main._getGitInfo = function () {
