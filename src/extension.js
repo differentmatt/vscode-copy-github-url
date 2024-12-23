@@ -15,6 +15,7 @@ function activate (context) {
 
         if (url) {
           clipboardy.writeSync(url)
+          vscode.window.showInformationMessage('GitHub URL copied to clipboard!')
         }
       } catch (e) {
         console.log(e)
