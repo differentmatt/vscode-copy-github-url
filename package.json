@@ -8,7 +8,7 @@
         "type": "git",
         "url": "https://github.com/differentmatt/vscode-copy-github-url"
     },
-    "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/master/README.md",
+    "homepage": "https://github.com/differentmatt/vscode-copy-github-url/blob/main/README.md",
     "bugs": "https://github.com/differentmatt/vscode-copy-github-url/issues",
     "icon": "images/icon.png",
     "galleryBanner": {
@@ -16,7 +16,7 @@
         "theme": "dark"
     },
     "engines": {
-        "vscode": "^1.59.0"
+        "vscode": "^1.74.0"
     },
     "license": "MIT",
     "categories": [
@@ -36,7 +36,7 @@
             },
             {
                 "command": "extension.gitHubUrlDefault",
-                "title": "Copy GitHub URL (Master)"
+                "title": "Copy GitHub URL (Main)"
             }
         ],
         "keybindings": [
@@ -78,33 +78,33 @@
         "vscode:prepublish": "webpack --mode production",
         "webpack": "webpack --mode development",
         "webpack-dev": "webpack --mode development --watch",
-        "lint": "eslint .",
-        "pretest": "npm run lint",
-        "test": "node ./test/runTest.js"
+        "lint": "standard --fix",
+        "test": "standard && node ./test/runTest.js"
+    },
+    "standard": {
+        "globals": [
+            "suite",
+            "test",
+            "setup",
+            "teardown"
+        ]
     },
     "devDependencies": {
-        "@types/glob": "^7.1.4",
-        "@types/mocha": "^9.0.0",
-        "@types/node": "16.x",
-        "@types/vscode": "^1.59.0",
-        "copy-webpack-plugin": "^9.0.1",
-        "eslint": "^7.32.0",
-        "glob": "^7.1.7",
-        "mocha": "^9.2.2",
-        "tape": "^5.9.0",
-        "typescript": "^4.3.5",
-        "vscode-test": "^1.6.1",
+        "@types/glob": "^8.1.0",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "22.x",
+        "@types/vscode": "^1.96.0",
+        "@vscode/test-electron": "^2.4.1",
+        "glob": "^11.0.0",
+        "globals": "^15.14.0",
+        "mocha": "^11.0.1",
+        "sinon": "^19.0.2",
+        "standard": "^17.1.2",
+        "typescript": "^5.7.2",
         "webpack": "^5.97.1",
-        "webpack-cli": "^4.8.0",
-        "webpack-permissions-plugin": "^1.0.8"
+        "webpack-cli": "^6.0.1"
     },
     "dependencies": {
-        "clipboardy": "^2.3.0",
-        "default-branch": "^1.1.0",
-        "git-branch": "^1.0.0",
-        "git-rev-sync": "^3.0.2",
-        "github-url-from-git": "^1.5.0",
-        "parse-git-config": "^3.0.0",
-        "standard": "^16.0.3"
+        "github-url-from-git": "^1.5.0"
     }
 }

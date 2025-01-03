@@ -1,6 +1,6 @@
 // A launch configuration that launches the extension inside a new window
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "configurations": [
     {
       "name": "Launch Extension",
@@ -19,8 +19,9 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/test/index"
-      ]
+        "--extensionTestsPath=${workspaceFolder}/test"
+      ],
+      "preLaunchTask": "npm: webpack"
     }
   ]
 }
