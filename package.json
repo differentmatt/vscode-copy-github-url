@@ -16,7 +16,8 @@
         "theme": "dark"
     },
     "engines": {
-        "vscode": "^1.74.0"
+        "vscode": "^1.74.0",
+        "node": ">=18.0.0"
     },
     "license": "MIT",
     "categories": [

@@ -5,10 +5,14 @@ const path = require('path')
 /** @type {import('webpack').Configuration} */
 const config = {
   target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-  entry: {
-    extension: './src/extension.js', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
-    test: './test/index.js'
-  },
+  entry: process.env.NODE_ENV === 'test'
+    ? {
+        extension: './src/extension.js',
+        test: './test/index.js'
+      }
+    : {
+        extension: './src/extension.js'
+      },
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'dist'),
@@ -29,6 +33,9 @@ const config = {
       }
     ]
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
+  optimization: {
+    minimize: process.env.NODE_ENV !== 'test' // Don't minify test builds
+  }
 }
 module.exports = config
