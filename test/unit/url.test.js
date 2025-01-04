@@ -17,8 +17,7 @@ suite('URL Generation', function () {
   setup(async () => {
     sandbox = sinon.createSandbox()
     extension = await vscode.extensions.getExtension('mattlott.copy-github-url')
-    await extension.activate()
-    _main = extension.exports
+    _main = await extension.activate()
     _main.setTestEnvironment(true)
   })
 
