@@ -265,15 +265,17 @@ async function getRepository (git, editor) {
   if (!repository) {
     const MAX_TIMEOUT = 5000
     let disposable
+    let timeoutId
     repository = await new Promise((resolve, reject) => {
       disposable = git.onDidOpenRepository(repo => {
         if (activeDoc.uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())) {
+          clearTimeout(timeoutId)
           disposable.dispose()
           resolve(repo)
         }
       })
 
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         disposable.dispose()
         reject(new Error(`Timeout waiting for Git repository after ${MAX_TIMEOUT}ms`))
       }, MAX_TIMEOUT)
