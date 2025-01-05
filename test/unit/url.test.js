@@ -39,7 +39,7 @@ suite('URL Generation', function () {
     stubGitExtension(sandbox, { projectDirectory })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor)
-    assert.equal(
+    assert.strictEqual(
       url,
       'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5'
     )
@@ -56,7 +56,7 @@ suite('URL Generation', function () {
     stubGitExtension(sandbox, { projectDirectory })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor)
-    assert.equal(
+    assert.strictEqual(
       url,
       'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5'
     )
@@ -75,7 +75,7 @@ suite('URL Generation', function () {
     stubGitExtension(sandbox, { projectDirectory })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor)
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L103', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L103', 'Invalid URL returned')
   })
 
   test('getGithubUrl should generate URL with current branch for single line selection', async function () {
@@ -92,7 +92,7 @@ suite('URL Generation', function () {
     stubGitExtension(sandbox, { projectDirectory })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor)
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/ipsum.md#L1-L2', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/test-branch/ipsum.md#L1-L2', 'Invalid URL returned')
   })
 
   test('getGithubUrl should handle multi-line selections', async function () {
@@ -109,7 +109,7 @@ suite('URL Generation', function () {
     stubGitExtension(sandbox, { projectDirectory })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor)
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L31-L41', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/test-branch/bar.md#L31-L41', 'Invalid URL returned')
   })
 
   test('getGithubUrl should generate commit-specific URLs', async function () {
@@ -129,7 +129,7 @@ suite('URL Generation', function () {
     })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor, { perma: true })
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/ipsum.md#L1-L2', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/ipsum.md#L1-L2', 'Invalid URL returned')
   })
 
   test('getGithubUrl should generate URL for default branch', async function () {
@@ -147,7 +147,7 @@ suite('URL Generation', function () {
     stubGitExtension(sandbox, { projectDirectory })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor, { default: true })
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/main/ipsum.md#L1-L2', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/main/ipsum.md#L1-L2', 'Invalid URL returned')
   })
 
   test('getGithubUrl - same active.line as end.line', async function () {
@@ -168,7 +168,7 @@ suite('URL Generation', function () {
     })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor)
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5')
   })
 
   test('getGithubUrl - permalink for a file that contains symbols with / path separator', async function () {
@@ -186,7 +186,7 @@ suite('URL Generation', function () {
     })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor, { perma: true })
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/a%20!%22%23$%25&\'()*+,-.:;%3C=%3E%3F@%5B%5C%5D%5E%60%7B%7C%7D~.md#L1-L2', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/a%20!%22%23$%25&\'()*+,-.:;%3C=%3E%3F@%5B%5C%5D%5E%60%7B%7C%7D~.md#L1-L2', 'Invalid URL returned')
   })
 
   test('getGithubUrl - permalink for a file that contains symbols with \\ path separator', async function () {
@@ -206,7 +206,7 @@ suite('URL Generation', function () {
     })
 
     const url = await _main.getGithubUrl(vsCodeMock.window.activeTextEditor, { perma: true })
-    assert.equal(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/a%20!%22%23$%25&\'()*+,-.:;%3C=%3E%3F@%5B/%5D%5E%60%7B%7C%7D~.md#L1-L2', 'Invalid URL returned')
+    assert.strictEqual(url, 'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/a%20!%22%23$%25&\'()*+,-.:;%3C=%3E%3F@%5B/%5D%5E%60%7B%7C%7D~.md#L1-L2', 'Invalid URL returned')
   })
 
   test('getGithubUrl should handle workspace with multiple folders', async function () {

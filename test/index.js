@@ -2,7 +2,7 @@ process.env.NODE_ENV = 'test'
 
 const path = require('path')
 const Mocha = require('mocha')
-const { globSync } = require('glob')
+const { glob } = require('glob')
 
 function run () {
   const mocha = new Mocha({
@@ -12,12 +12,11 @@ function run () {
 
   const testsRoot = path.resolve(__dirname)
 
-  return new Promise((resolve, reject) => {
-    const files = globSync('**/**.test.js', { cwd: testsRoot }) // Only find tests in test directory
-
-    files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)))
-
+  return new Promise(async (resolve, reject) => {
     try {
+      const files = await glob('**/**.test.js', { cwd: testsRoot })
+      files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)))
+
       mocha.run(failures => {
         if (failures > 0) {
           reject(new Error(`${failures} tests failed.`))

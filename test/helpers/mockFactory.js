@@ -17,6 +17,7 @@ const { createGitApi } = require('./gitApiFactory')
  * @returns {Object} An `vscode` alike object
  */
 function getVsCodeMock (options) {
+  if (!options.projectDirectory) throw new Error('projectDirectory is required for getVsCodeMock.')
   const projectRoot = options.projectDirectory
   const fullPath = options.filePath
     ? [projectRoot, options.filePath].join(options.sep || '/')

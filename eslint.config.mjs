@@ -10,13 +10,7 @@ export default [{
     },
 
     ecmaVersion: 'latest',
-    sourceType: 'module',
-
-    parserOptions: {
-      ecmaFeatures: {
-        jsx: true
-      }
-    }
+    sourceType: 'module'
   },
   rules: {
     'no-const-assign': 'warn',

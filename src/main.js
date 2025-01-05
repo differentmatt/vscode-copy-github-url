@@ -180,7 +180,7 @@ async function getGithubUrlFromRemotes (repository) {
       if (url) return Promise.resolve(url)
     // eslint-disable-next-line no-unused-vars
     } catch (e) {
-      continue // Try next remote if this one fails
+      // Try next remote if this one fails
     }
   }
 
@@ -254,6 +254,8 @@ async function getRepository (git, editor) {
   }
 
   // Wait for remotes to populate
+  // TODO: Using a hard-coded 5-second timeout for repository discovery may cause unexpected failures in larger or more complex projects.
+  // TODO: Consider making this timeout configurable or dynamically adjusting based on repository size.
   let attempts = 0
   while (attempts < 10) {
     if (repository.state.remotes && repository.state.remotes.length > 0) {

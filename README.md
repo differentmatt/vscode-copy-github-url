@@ -24,7 +24,7 @@ Copy a GitHub default branch URL of your current file location to the clipboard.
 
 Usage: `Ctrl+Shift+L M`
 
-Example: [`https://github.com/differentmatt/vscode-copy-github-url/blob/master/extension.js#L4`](https://github.com/differentmatt/vscode-copy-github-url/blob/master/extension.js#L4)
+Example: [`https://github.com/differentmatt/vscode-copy-github-url/blob/main/extension.js#L4`](https://github.com/differentmatt/vscode-copy-github-url/blob/main/extension.js#L4)
 
 ## Install
 

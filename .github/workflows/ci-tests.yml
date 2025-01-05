@@ -1,5 +1,10 @@
 # To run locally:
+# Prerequisites:
+#   1. Install act: https://github.com/nektos/act#installation
+#   2. Ensure Docker is running
+# Then:
 # act -W .github/workflows/ci-tests.yml --container-architecture linux/amd64
+# Note: First run may take time to download container images
 
 name: CI Tests
 

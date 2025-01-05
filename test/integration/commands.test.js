@@ -50,7 +50,7 @@ suite('Extension Commands', function () {
     await vscode.commands.executeCommand('extension.gitHubUrl')
 
     assert(writeTextStub.calledOnce, 'Clipboard should be called once')
-    assert.equal(
+    assert.strictEqual(
       writeTextStub.firstCall.args[0],
       'https://github.com/foo/bar-baz/blob/test-branch/subdir1/subdir2/myFileName.txt#L5'
     )
@@ -86,7 +86,7 @@ suite('Extension Commands', function () {
     await vscode.commands.executeCommand('extension.gitHubUrlPerma')
 
     assert(writeTextStub.calledOnce, 'Clipboard should be called once')
-    assert.equal(
+    assert.strictEqual(
       writeTextStub.firstCall.args[0],
       'https://github.com/foo/bar-baz/blob/75bf4eea9aa1a7fd6505d0d0aa43105feafa92ef/ipsum.md#L1-L2'
     )
@@ -122,7 +122,7 @@ suite('Extension Commands', function () {
     await vscode.commands.executeCommand('extension.gitHubUrlDefault')
 
     assert(writeTextStub.calledOnce, 'Clipboard should be called once')
-    assert.equal(
+    assert.strictEqual(
       writeTextStub.firstCall.args[0],
       'https://github.com/foo/bar-baz/blob/main/ipsum.md#L1-L2'
     )
