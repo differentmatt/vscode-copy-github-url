@@ -21,7 +21,10 @@
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/test"
       ],
-      "preLaunchTask": "npm: webpack"
+      "preLaunchTask": "npm: webpack",
+      "env": {
+        "NODE_ENV": "development"
+      }
     }
   ]
 }

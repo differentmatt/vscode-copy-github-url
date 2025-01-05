@@ -702,4 +702,85 @@ origin/feature/123
     const result = await _main.getRepository(gitApi, vsCodeMock.window.activeTextEditor)
     assert.strictEqual(result, activeRepo, 'Should use repository containing active document instead of rootGitFolder')
   })
+
+  test('getGithubUrl should handle missing commit hash for permalink', async function () {
+    const vsCodeMock = getVsCodeMock({
+      projectDirectory: '/test/path'
+    })
+    stubWorkspace(sandbox, _main)
+
+    sandbox.stub(vscode.extensions, 'getExtension').returns({
+      isActive: true,
+      exports: {
+        getAPI: () => ({
+          repositories: [{
+            rootUri: { fsPath: '/test/path' },
+            state: {
+              HEAD: {
+                commit: undefined // Explicitly set commit to undefined
+              },
+              remotes: [{ name: 'origin', fetchUrl: 'https://github.com/user/repo.git' }]
+            }
+          }],
+          onDidOpenRepository: () => {
+            return { dispose: () => {} }
+          }
+        })
+      }
+    })
+
+    try {
+      await _main.getGithubUrl(vsCodeMock.window.activeTextEditor, { perma: true })
+      assert.fail('Should have thrown an error')
+    } catch (error) {
+      assert(error.message.includes('No commit hash found'))
+    }
+  })
+
+  test('getRepository should handle repository discovery race condition', async function () {
+    const workspacePath = '/workspace/root'
+    const activeFilePath = 'src/file.js'
+    const vsCodeMock = getVsCodeMock({
+      projectDirectory: workspacePath,
+      filePath: activeFilePath
+    })
+    stubWorkspace(sandbox, _main, workspacePath)
+
+    const clock = sandbox.useFakeTimers()
+
+    const repo = {
+      rootUri: vscode.Uri.file(workspacePath),
+      state: {
+        remotes: [{ name: 'origin', fetchUrl: 'https://github.com/foo/bar-baz.git' }]
+      }
+    }
+
+    let repoCallback = function (r) { return r }
+    const gitApi = {
+      repositories: [],
+      onDidOpenRepository: (callback) => {
+        repoCallback = callback
+        return { dispose: () => {} }
+      }
+    }
+
+    const repoPromise = _main.getRepository(gitApi, vsCodeMock.window.activeTextEditor)
+
+    // Advance past the timeout
+    await clock.tickAsync(5001)
+
+    // Try to trigger the callback after timeout
+    if (repoCallback) {
+      repoCallback(repo)
+    }
+
+    try {
+      await repoPromise
+      assert.fail('Should have thrown timeout error')
+    } catch (error) {
+      assert(error.message.includes('Timeout waiting for Git repository'))
+    } finally {
+      clock.restore()
+    }
+  })
 })

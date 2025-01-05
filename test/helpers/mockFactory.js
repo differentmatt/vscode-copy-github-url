@@ -4,6 +4,7 @@ const { createGitApi } = require('./gitApiFactory')
  * A helper function to return a vscode object imitation.
  *
  * @param {Object} [options]
+ *@param {String} [options.accessToken] Mock authentication token
  * @param {String} [options.branch] Branch name
  * @param {String} [options.commit] Commit hash
  * @param {Number} [options.endLine] Line number where the current selection ends

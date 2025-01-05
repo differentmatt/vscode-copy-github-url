@@ -41,7 +41,13 @@ async function getGithubUrl (editor, type = {}) {
     // Fallback: uses repository to get root path, and runs git branch -r to get the branch name via origin/HEAD
     // Fallback: user configured default branch
     const getBranch = async () => {
-      if (type.perma) return repository.state.HEAD.commit
+      if (type.perma) {
+        const commit = repository.state.HEAD?.commit
+        if (!commit) {
+          throw new Error('No commit hash found. Repository may be empty or still loading.')
+        }
+        return commit
+      }
       return type.default
         ? await module.exports.getDefaultBranch(repository)
         : repository.state.HEAD?.name || 'main'
@@ -67,21 +73,28 @@ async function getDefaultBranch (repository) {
     try {
       const configPath = path.join(repository.rootUri.fsPath, '.git', 'config')
       const gitConfig = await fs.readFile(configPath, 'utf8')
-      if (gitConfig.toLowerCase().includes('[branch "main"]'.toLowerCase())) return 'main'
-      if (gitConfig.toLowerCase().includes('[branch "master"]'.toLowerCase())) return 'master'
+      const branchRegex = /^\[branch "(.*?)"\]\s*$/mg
+      const matches = [...gitConfig.matchAll(branchRegex)]
+      const defaultBranches = ['main', 'master']
+
+      for (const [, branch] of matches) {
+        if (defaultBranches.includes(branch)) return branch
+      }
     } catch (error) {
       if (!isTestEnvironment) console.error('Failed to read git config:', error)
     }
 
     // 2. Try git branch -r
+    const MAX_RETRIES = 3
+    const RETRY_DELAY = 500
     try {
       let attempts = 0
-      while (attempts < 3) { // Fewer retries since this is less common
+      while (attempts < MAX_RETRIES) { // Fewer retries since this is less common
         try {
           const defaultBranch = await new Promise((resolve, reject) => {
             cp.exec('git branch -r', { cwd: repository.rootUri.fsPath }, (err, stdout) => {
               if (err) {
-                reject(err)
+                reject(new Error(`Failed to execute git branch -r: ${err.message}`))
                 return
               }
 
@@ -113,8 +126,11 @@ async function getDefaultBranch (repository) {
           if (defaultBranch) return defaultBranch
         } catch (error) {
           if (attempts === 2) throw error // Re-throw on final attempt
+          if (attempts === MAX_RETRIES - 1) {
+            throw new Error(`Failed to get default branch after ${MAX_RETRIES} attempts: ${error.message}`)
+          }
         } finally {
-          await new Promise(resolve => setTimeout(resolve, 500))
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
           attempts++
         }
       }
@@ -178,8 +194,8 @@ async function getGithubUrlFromRemotes (repository) {
 
       const url = githubUrlFromGit(remote.fetchUrl, { extraBaseUrls: [gitUrl, domain].filter(Boolean) })
       if (url) return Promise.resolve(url)
-    // eslint-disable-next-line no-unused-vars
-    } catch (e) {
+    } catch (error) {
+      if (!isTestEnvironment) console.warn(`Failed to process remote ${remote.name}: ${error.message}`)
       // Try next remote if this one fails
     }
   }
@@ -189,13 +205,17 @@ async function getGithubUrlFromRemotes (repository) {
 
 /**
  * Normalizes a path for GitHub URL.
+ * Follows RFC 3986 for percent-encoding.
  *
  * @param {string} inputPath - The input path to normalize.
  * @param {string} [pathSeparator=path.sep] - The path separator to use.
  * @returns {string} The normalized path.
  */
 function normalizePathForGitHub (inputPath, pathSeparator = path.sep) {
-  return inputPath.split(pathSeparator).map((p) => encodeURI(p).replace('#', '%23').replace('?', '%3F')).join('/')
+  return inputPath.split(pathSeparator)
+    .map((p) => encodeURIComponent(p)
+      .replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`))
+    .join('/')
 }
 
 /**
@@ -237,19 +257,23 @@ async function getRepository (git, editor) {
 
   // If still no repository, wait for one to be discovered
   if (!repository) {
+    const MAX_TIMEOUT = 5000
     repository = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        disposable.dispose()
-        reject(new Error('Timeout waiting for Git repository'))
-      }, 5000)
-
+      let isResolved = false
       const disposable = git.onDidOpenRepository(repo => {
         if (activeDoc.uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())) {
-          clearTimeout(timeout)
+          isResolved = true
           disposable.dispose()
           resolve(repo)
         }
       })
+
+      setTimeout(() => {
+        if (!isResolved) {
+          disposable.dispose()
+          reject(new Error('Timeout waiting for Git repository'))
+        }
+      }, MAX_TIMEOUT)
     })
   }
 
