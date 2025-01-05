@@ -1,3 +1,11 @@
+# To run locally:
+# Prerequisites:
+#   1. Install act: https://github.com/nektos/act#installation
+#   2. Ensure Docker is running
+# Then:
+# act -W .github/workflows/ci-tests.yml --container-architecture linux/amd64
+# Note: First run may take time to download container images
+
 name: CI Tests
 
 on:
@@ -7,20 +15,30 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: '18'
         cache: 'npm'
-        
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        if [ "$ACT" = "true" ]; then
+          sudo apt-get install -y xvfb libnss3 libasound2 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libgtk-3-0 libgbm1
+        else
+          sudo apt-get install -y xvfb libnss3 libgbm1
+        fi
+
     - name: Install dependencies
       run: npm ci
-      
+
+    - name: Build extension (dev mode)
+      run: npm run webpack
+
     - name: Run tests
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: npm run test
+      run: xvfb-run npm run test

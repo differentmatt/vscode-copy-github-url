@@ -1,42 +1,37 @@
-const path = require('path');
-const Mocha = require('mocha');
-const glob = require('glob');
+process.env.NODE_ENV = 'test'
 
-function run() {
-  // Create the mocha test
+const path = require('path')
+const Mocha = require('mocha')
+const { glob } = require('glob')
+
+function run () {
   const mocha = new Mocha({
     ui: 'tdd',
     color: true
-  });
+  })
 
-  const testsRoot = path.resolve(__dirname, '..');
+  const testsRoot = path.resolve(__dirname)
 
-  return new Promise((c, e) => {
-    glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
-      if (err) {
-        return e(err);
-      }
+  return glob('**/**.test.js', { cwd: testsRoot })
+    .then(files => {
+      files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)))
 
-      // Add files to the test suite
-      files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
-
-      try {
-        // Run the mocha test
+      return new Promise((resolve, reject) => {
         mocha.run(failures => {
           if (failures > 0) {
-            e(new Error(`${failures} tests failed.`));
+            reject(new Error(`${failures} tests failed.`))
           } else {
-            c();
+            resolve()
           }
-        });
-      } catch (err) {
-        console.error(err);
-        e(err);
-      }
-    });
-  });
+        })
+      })
+    })
+    .catch(err => {
+      console.error(err)
+      throw err
+    })
 }
 
 module.exports = {
   run
-};
+}
