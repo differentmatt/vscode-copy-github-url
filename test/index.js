@@ -12,23 +12,24 @@ function run () {
 
   const testsRoot = path.resolve(__dirname)
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      const files = await glob('**/**.test.js', { cwd: testsRoot })
+  return glob('**/**.test.js', { cwd: testsRoot })
+    .then(files => {
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)))
 
-      mocha.run(failures => {
-        if (failures > 0) {
-          reject(new Error(`${failures} tests failed.`))
-        } else {
-          resolve()
-        }
+      return new Promise((resolve, reject) => {
+        mocha.run(failures => {
+          if (failures > 0) {
+            reject(new Error(`${failures} tests failed.`))
+          } else {
+            resolve()
+          }
+        })
       })
-    } catch (err) {
+    })
+    .catch(err => {
       console.error(err)
-      reject(err)
-    }
-  })
+      throw err
+    })
 }
 
 module.exports = {
