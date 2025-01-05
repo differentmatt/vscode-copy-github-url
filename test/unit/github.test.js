@@ -35,7 +35,7 @@ suite('GitHub Integration', function () {
     })
     stubWorkspace(sandbox, _main, vsCodeMock.workspace.workspaceFolders[0].uri.fsPath)
 
-    const repository = await _main.getRepository(vsCodeMock.extensions.getExtension().exports.getAPI(), vsCodeMock.window.activeTextEditor)
+    const repository = await _main.getRepository(vsCodeMock.extensions.getExtension('vscode.git').exports.getAPI(), vsCodeMock.window.activeTextEditor)
     assert.strictEqual(repository.state.remotes[0].fetchUrl, 'https://github.com/user/repo.git')
   })
 

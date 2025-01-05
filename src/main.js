@@ -1,5 +1,8 @@
 'use strict'
 
+const BRANCH_DISCOVERY_MAX_RETRIES = 3
+const BRANCH_DISCOVERY_RETRY_DELAY = 500
+
 const githubUrlFromGit = require('github-url-from-git')
 const path = require('path')
 const vscode = require('vscode')
@@ -85,8 +88,8 @@ async function getDefaultBranch (repository) {
     }
 
     // 2. Try git branch -r
-    const MAX_RETRIES = 3
-    const RETRY_DELAY = 500
+    const MAX_RETRIES = BRANCH_DISCOVERY_MAX_RETRIES
+    const RETRY_DELAY = BRANCH_DISCOVERY_RETRY_DELAY
     try {
       let attempts = 0
       while (attempts < MAX_RETRIES) { // Fewer retries since this is less common

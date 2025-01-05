@@ -4,7 +4,7 @@ const { createGitApi } = require('./gitApiFactory')
  * A helper function to return a vscode object imitation.
  *
  * @param {Object} [options]
- *@param {String} [options.accessToken] Mock authentication token
+ * @param {String} [options.accessToken] Mock authentication token
  * @param {String} [options.branch] Branch name
  * @param {String} [options.commit] Commit hash
  * @param {Number} [options.endLine] Line number where the current selection ends
@@ -18,7 +18,7 @@ const { createGitApi } = require('./gitApiFactory')
  * @returns {Object} An `vscode` alike object
  */
 function getVsCodeMock (options) {
-  if (!options.projectDirectory) throw new Error('projectDirectory is required for getVsCodeMock.')
+  if (!options.projectDirectory) throw new Error('projectDirectory is required for getVsCodeMock. Please provide an absolute path to the project directory.')
   const projectRoot = options.projectDirectory
   const fullPath = options.filePath
     ? [projectRoot, options.filePath].join(options.sep || '/')
@@ -45,14 +45,19 @@ function getVsCodeMock (options) {
     },
     window: { activeTextEditor: editorMock },
     extensions: {
-      getExtension: () => ({
-        exports: {
-          getAPI: () => createGitApi(options)
+      getExtension: (extensionId) => {
+        if (extensionId !== 'vscode.git') {
+          return undefined
         }
-      })
+        return {
+          exports: {
+            getAPI: () => createGitApi(options)
+          }
+        }
+      }
     },
     authentication: {
-      getSession: async () => ({ accessToken: 'fake-token' })
+      getSession: async () => ({ accessToken: options.accessToken || 'fake-token' })
     }
   }
 }
