@@ -173,7 +173,7 @@ async function getGithubUrlFromRemotes (repository) {
       const remote = remotes.find(r => r.name === branchConfig.remote)
       if (remote) {
         // Always include both gitUrl and remote domain as extraBaseUrls
-        const domain = remote.fetchUrl.match(/(?:https?:\/\/|git@)([^:/]+)/)?.[1]
+        const domain = remote.fetchUrl.match(/(?:https?:\/\/|git@|ssh:\/\/(?:[^@]+@)?)([^:/]+)/)?.[1]
         return Promise.resolve(githubUrlFromGit(remote.fetchUrl, {
           extraBaseUrls: [gitUrl, domain].filter(Boolean)
         }))
@@ -192,7 +192,7 @@ async function getGithubUrlFromRemotes (repository) {
   // Try each remote
   for (const remote of remotes) {
     try {
-      const domain = remote.fetchUrl.match(/(?:https?:\/\/|git@)([^:/]+)/)?.[1]
+      const domain = remote.fetchUrl.match(/(?:https?:\/\/|git@|ssh:\/\/(?:[^@]+@)?)([^:/]+)/)?.[1]
       if (!domain) continue
 
       const url = githubUrlFromGit(remote.fetchUrl, { extraBaseUrls: [gitUrl, domain].filter(Boolean) })
