@@ -91,50 +91,53 @@ async function getDefaultBranch (repository) {
     const MAX_RETRIES = BRANCH_DISCOVERY_MAX_RETRIES
     const RETRY_DELAY = BRANCH_DISCOVERY_RETRY_DELAY
     try {
-      let attempts = 0
-      while (attempts < MAX_RETRIES) { // Fewer retries since this is less common
-        try {
-          const defaultBranch = await new Promise((resolve, reject) => {
-            cp.exec('git branch -r', { cwd: repository.rootUri.fsPath }, (err, stdout) => {
-              if (err) {
-                reject(new Error(`Failed to execute git branch -r: ${err.message}`))
+      const executeGitBranch = async () => {
+        return new Promise((resolve, reject) => {
+          cp.exec('git branch -r', { cwd: repository.rootUri.fsPath }, (err, stdout) => {
+            if (err) {
+              reject(new Error(`Failed to execute git branch -r: ${err.message}`))
+              return
+            }
+
+            // Get list of branches, removing any whitespace/empty lines
+            const branches = stdout.split('\n').map(b => b.trim()).filter(Boolean)
+
+            // Look for HEAD pointer first as it's the most reliable indicator
+            const headPointer = branches.find(b => b.startsWith('origin/HEAD'))
+            if (headPointer) {
+              const match = headPointer.match(/origin\/HEAD -> origin\/(.+)/)
+              if (match) {
+                resolve(match[1])
                 return
               }
+            }
 
-              // Get list of branches, removing any whitespace/empty lines
-              const branches = stdout.split('\n').map(b => b.trim()).filter(Boolean)
-
-              // Look for HEAD pointer first as it's the most reliable indicator
-              const headPointer = branches.find(b => b.startsWith('origin/HEAD'))
-              if (headPointer) {
-                const match = headPointer.match(/origin\/HEAD -> origin\/(.+)/)
-                if (match) {
-                  resolve(match[1])
-                  return
-                }
-              }
-
-              // Fallback to other branch detection methods
-              if (branches.length === 1) {
-                resolve(branches[0].replace('origin/', ''))
-              } else if (branches.some(b => b.toLowerCase() === 'origin/main')) {
-                resolve('main')
-              } else if (branches.some(b => b.toLowerCase() === 'origin/master')) {
-                resolve('master')
-              } else {
-                resolve(undefined)
-              }
-            })
+            // Fallback to other branch detection methods
+            if (branches.length === 1) {
+              resolve(branches[0].replace('origin/', ''))
+            } else if (branches.some(b => b.toLowerCase() === 'origin/main')) {
+              resolve('main')
+            } else if (branches.some(b => b.toLowerCase() === 'origin/master')) {
+              resolve('master')
+            } else {
+              resolve(undefined)
+            }
           })
+        })
+      }
+
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        try {
+          const defaultBranch = await executeGitBranch()
           if (defaultBranch) return defaultBranch
         } catch (error) {
-          if (attempts === 2) throw error // Re-throw on final attempt
-          if (attempts === MAX_RETRIES - 1) {
+          if (attempt === MAX_RETRIES - 1) {
             throw new Error(`Failed to get default branch after ${MAX_RETRIES} attempts: ${error.message}`)
           }
         } finally {
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
-          attempts++
+          if (attempt < MAX_RETRIES - 1) { // Don't delay after last attempt
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+          }
         }
       }
     } catch (error) {
@@ -261,21 +264,18 @@ async function getRepository (git, editor) {
   // If still no repository, wait for one to be discovered
   if (!repository) {
     const MAX_TIMEOUT = 5000
+    let disposable
     repository = await new Promise((resolve, reject) => {
-      let isResolved = false
-      const disposable = git.onDidOpenRepository(repo => {
+      disposable = git.onDidOpenRepository(repo => {
         if (activeDoc.uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())) {
-          isResolved = true
           disposable.dispose()
           resolve(repo)
         }
       })
 
       setTimeout(() => {
-        if (!isResolved) {
-          disposable.dispose()
-          reject(new Error('Timeout waiting for Git repository'))
-        }
+        disposable.dispose()
+        reject(new Error(`Timeout waiting for Git repository after ${MAX_TIMEOUT}ms`))
       }, MAX_TIMEOUT)
     })
   }
