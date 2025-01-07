@@ -28,7 +28,6 @@ export default [{
     '*.vsix',
     '.vscode/**',
     'yarn.lock',
-    'dist/**',
-    'fallbacks/**'
+    'dist/**'
   ]
 }]

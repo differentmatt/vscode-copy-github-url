@@ -8,3 +8,9 @@ vsc-extension-quickstart.md
 node_modules
 src/
 webpack.config.js
+.github/**
+eslint.config.mjs
+dist/*.map
+dist/test.js
+dist/test.js.map
+dist/*.LICENSE.txt

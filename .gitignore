@@ -4,5 +4,4 @@ node_modules
 .vscode
 yarn.lock
 dist/
-fallbacks/
 .DS_Store
