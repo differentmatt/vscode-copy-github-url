@@ -55,9 +55,6 @@ function getVsCodeMock (options) {
           }
         }
       }
-    },
-    authentication: {
-      getSession: async () => ({ accessToken: options.accessToken || 'fake-token' })
     }
   }
 }

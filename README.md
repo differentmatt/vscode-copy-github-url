@@ -30,3 +30,11 @@ Example: [`https://github.com/differentmatt/vscode-copy-github-url/blob/main/ext
 
 1. Within Visual Studio Code, open the command palette (`Ctrl-Shift-P` / `Cmd-Shift-P`)
 2. Type `install extension` and search for `copy github url`
+
+## Telemetry
+
+This extension collects anonymous telemetry data to help improve the extension's functionality.
+
+You can disable [telemetry](https://code.visualstudio.com/docs/getstarted/telemetry) collection by setting `telemetry.telemetryLevel` to `off` in VS Code settings.
+
+No personal or repository-identifying information is collected.

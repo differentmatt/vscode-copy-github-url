@@ -637,7 +637,10 @@ origin/feature/123
     })
     stubWorkspace(sandbox, _main, workspacePath)
 
-    const clock = sandbox.useFakeTimers()
+    const clock = sandbox.useFakeTimers({
+      shouldAdvanceTime: true,
+      shouldClearNativeTimers: true
+    })
 
     const repo = {
       rootUri: vscode.Uri.file(workspacePath),
@@ -746,7 +749,10 @@ origin/feature/123
     })
     stubWorkspace(sandbox, _main, workspacePath)
 
-    const clock = sandbox.useFakeTimers()
+    const clock = sandbox.useFakeTimers({
+      shouldAdvanceTime: true,
+      shouldClearNativeTimers: true
+    })
 
     const repo = {
       rootUri: vscode.Uri.file(workspacePath),

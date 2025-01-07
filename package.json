@@ -77,9 +77,9 @@
     },
     "scripts": {
         "vscode:prepublish": "webpack --mode production",
+        "package": "npm run vscode:prepublish && vsce package",
         "webpack": "NODE_ENV=test webpack --mode development",
-        "webpack-dev": "NODE_ENV=test webpack --mode development --watch",
-        "lint": "standard --fix",
+        "lint": "npx standard --fix",
         "test": "standard && node ./test/runTest.js"
     },
     "standard": {
@@ -87,15 +87,17 @@
             "suite",
             "test",
             "setup",
-            "teardown"
+            "teardown",
+            "__INSTRUMENTATION_KEY__"
         ]
     },
     "devDependencies": {
         "@types/glob": "^8.1.0",
         "@types/mocha": "^10.0.10",
         "@types/node": "22.x",
-        "@types/vscode": "^1.96.0",
+        "@types/vscode": "^1.74.0",
         "@vscode/test-electron": "^2.4.1",
+        "@vscode/vsce": "^3.2.1",
         "glob": "^11.0.0",
         "globals": "^15.14.0",
         "mocha": "^11.0.1",
@@ -106,6 +108,7 @@
         "webpack-cli": "^6.0.1"
     },
     "dependencies": {
+        "@vscode/extension-telemetry": "^0.9.8",
         "github-url-from-git": "^1.5.0"
     }
 }

@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 const path = require('path')
 
 /** @type {import('webpack').Configuration} */
@@ -33,8 +34,13 @@ const config = {
   mode: process.env.NODE_ENV === 'test' ? 'development' : 'production',
   devtool: process.env.NODE_ENV === 'test' ? 'source-map' : false,
   optimization: {
-    minimize: process.env.NODE_ENV !== 'test' // Minimize unless testing
-  }
+    minimize: process.env.NODE_ENV !== 'test'
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      __INSTRUMENTATION_KEY__: JSON.stringify(process.env.INSTRUMENTATION_KEY || '')
+    })
+  ]
 }
 
 module.exports = config
