@@ -1,6 +1,10 @@
 # Copy GitHub URL VS Code extension
 
-3 separate commands described below.
+Available within VS Code and Cursor.
+
+Please file an [issue](https://github.com/differentmatt/vscode-copy-github-url/issues) for bugs or feature requests.  Thanks!
+
+VS Code Extension Marketplace entry [here](https://marketplace.visualstudio.com/items?itemName=mattlott.copy-github-url).
 
 ## Copy GitHub URL
 
