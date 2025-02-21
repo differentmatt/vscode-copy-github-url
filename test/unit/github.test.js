@@ -789,4 +789,92 @@ origin/feature/123
       clock.restore()
     }
   })
+
+  test('getGithubUrlFromRemotes should use domainOverride over gitUrl', async function () {
+    const repository = {
+      state: {
+        HEAD: { name: 'main' },
+        refs: [],
+        remotes: [{ name: 'origin', fetchUrl: 'git@foo_bar:user/repo.git' }]
+      }
+    }
+
+    sandbox.stub(vscode.workspace, 'getConfiguration').returns({
+      get: (key) => {
+        if (key === 'domainOverride') return 'github.com'
+        if (key === 'gitUrl') return 'other.com'
+        return undefined
+      }
+    })
+
+    const url = await _main.getGithubUrlFromRemotes(repository)
+    assert.strictEqual(url, 'https://github.com/user/repo')
+  })
+
+  test('getGithubUrlFromRemotes should fallback to gitUrl when domainOverride not set', async function () {
+    const repository = {
+      state: {
+        HEAD: { name: 'main' },
+        refs: [],
+        remotes: [{ name: 'origin', fetchUrl: 'git@foo_bar:user/repo.git' }]
+      }
+    }
+
+    sandbox.stub(vscode.workspace, 'getConfiguration').returns({
+      get: (key) => {
+        if (key === 'domainOverride') return undefined
+        if (key === 'gitUrl') return 'github.com'
+        return undefined
+      }
+    })
+
+    const url = await _main.getGithubUrlFromRemotes(repository)
+    assert.strictEqual(url, 'https://github.com/user/repo')
+  })
+
+  test('getDefaultBranch should prioritize defaultBranchFallback configuration', async function () {
+    const repository = {
+      rootUri: { fsPath: '/test/path' }
+    }
+
+    // Configure both fallback and git config
+    sandbox.stub(vscode.workspace, 'getConfiguration').returns({
+      get: (key) => key === 'defaultBranchFallback' ? 'custom-branch' : undefined
+    })
+
+    sandbox.stub(fs.promises, 'readFile').resolves(`
+[branch "main"]
+  remote = origin
+  merge = refs/heads/main
+`)
+
+    const branch = await _main.getDefaultBranch(repository)
+    assert.strictEqual(branch, 'custom-branch', 'Should use defaultBranchFallback even when git config exists')
+  })
+
+  test('getDefaultBranch should follow correct fallback chain', async function () {
+    const repository = {
+      rootUri: { fsPath: '/test/path' }
+    }
+
+    // No defaultBranchFallback configured
+    sandbox.stub(vscode.workspace, 'getConfiguration').returns({
+      get: () => undefined
+    })
+
+    // Mock git config with main branch
+    sandbox.stub(fs.promises, 'readFile').resolves(`
+[branch "main"]
+  remote = origin
+  merge = refs/heads/main
+`)
+
+    // Mock git branch -r command
+    sandbox.stub(cp, 'exec').callsFake((cmd, opts, callback) => {
+      callback(null, 'origin/HEAD -> origin/develop\norigin/main\norigin/develop')
+    })
+
+    const branch = await _main.getDefaultBranch(repository)
+    assert.strictEqual(branch, 'main', 'Should fall back to git config when no defaultBranchFallback')
+  })
 })

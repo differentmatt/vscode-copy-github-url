@@ -72,7 +72,12 @@ async function getGithubUrl (editor, type = {}) {
  */
 async function getDefaultBranch (repository) {
   try {
-    // 1. Try reading .git config
+    // 1. Try user configuration
+    const extensionConfig = vscode.workspace.getConfiguration('copyGithubUrl')
+    const defaultBranchFallback = extensionConfig.get('defaultBranchFallback')
+    if (defaultBranchFallback) return defaultBranchFallback
+
+    // 2. Try reading .git config
     try {
       const configPath = path.join(repository.rootUri.fsPath, '.git', 'config')
       const gitConfig = await fs.readFile(configPath, 'utf8')
@@ -87,7 +92,7 @@ async function getDefaultBranch (repository) {
       if (!isTestEnvironment) console.error('Failed to read git config:', error)
     }
 
-    // 2. Try git branch -r
+    // 3. Try git branch -r
     const MAX_RETRIES = BRANCH_DISCOVERY_MAX_RETRIES
     const RETRY_DELAY = BRANCH_DISCOVERY_RETRY_DELAY
     try {
@@ -144,11 +149,6 @@ async function getDefaultBranch (repository) {
       if (!isTestEnvironment) console.error('Failed to run git branch -r:', error)
     }
 
-    // 3. Try user configuration
-    const extensionConfig = vscode.workspace.getConfiguration('copyGithubUrl')
-    const defaultBranchFallback = extensionConfig.get('defaultBranchFallback')
-    if (defaultBranchFallback) return defaultBranchFallback
-
     throw new Error('Could not determine default branch. Configure copyGithubUrl.defaultBranchFallback in settings.')
   } catch (error) {
     if (error.message.includes('Configure copyGithubUrl.defaultBranchFallback')) throw error
@@ -163,7 +163,8 @@ async function getDefaultBranch (repository) {
  */
 async function getGithubUrlFromRemotes (repository) {
   const config = vscode.workspace.getConfiguration('copyGithubUrl')
-  const gitUrl = config.get('gitUrl')
+  // Check domainOverride first, fall back to gitUrl for backwards compatibility
+  const domainOverride = config.get('domainOverride') || config.get('gitUrl')
   const remotes = repository.state.remotes
 
   // Try to get the remote for the current branch first
@@ -175,20 +176,18 @@ async function getGithubUrlFromRemotes (repository) {
     if (branchConfig) {
       const remote = remotes.find(r => r.name === branchConfig.remote)
       if (remote) {
-        // Always include both gitUrl and remote domain as extraBaseUrls
-        const domain = remote.fetchUrl.match(/(?:https?:\/\/|git@|ssh:\/\/(?:[^@]+@)?)([^:/]+)/)?.[1]
-        return Promise.resolve(githubUrlFromGit(remote.fetchUrl, {
-          extraBaseUrls: [gitUrl, domain].filter(Boolean)
-        }))
+        // If gitUrl is configured, only use that as the base URL
+        const extraBaseUrls = domainOverride ? [domainOverride] : [remote.fetchUrl.match(/(?:https?:\/\/|git@|ssh:\/\/(?:[^@]+@)?)([^:/]+)/)?.[1]].filter(Boolean)
+        return Promise.resolve(githubUrlFromGit(remote.fetchUrl, { extraBaseUrls }))
       }
     }
   }
 
-  // If gitUrl is configured, look for that specific domain next
-  if (gitUrl) {
-    const enterpriseRemote = remotes.find(r => r.fetchUrl.toLowerCase().includes(gitUrl.toLowerCase()))
+  // If domainOverride is configured, look for that specific domain next
+  if (domainOverride) {
+    const enterpriseRemote = remotes.find(r => r.fetchUrl.toLowerCase().includes(domainOverride.toLowerCase()))
     if (enterpriseRemote) {
-      return Promise.resolve(githubUrlFromGit(enterpriseRemote.fetchUrl, { extraBaseUrls: [gitUrl] }))
+      return Promise.resolve(githubUrlFromGit(enterpriseRemote.fetchUrl, { extraBaseUrls: [domainOverride] }))
     }
   }
 
@@ -198,7 +197,10 @@ async function getGithubUrlFromRemotes (repository) {
       const domain = remote.fetchUrl.match(/(?:https?:\/\/|git@|ssh:\/\/(?:[^@]+@)?)([^:/]+)/)?.[1]
       if (!domain) continue
 
-      const url = githubUrlFromGit(remote.fetchUrl, { extraBaseUrls: [gitUrl, domain].filter(Boolean) })
+      const normalizedUrl = domainOverride
+        ? remote.fetchUrl.replace(domain, domainOverride)
+        : remote.fetchUrl
+      const url = githubUrlFromGit(normalizedUrl, { extraBaseUrls: [domain].filter(Boolean) })
       if (url) return Promise.resolve(url)
     } catch (error) {
       if (!isTestEnvironment) console.warn(`Failed to process remote ${remote.name}: ${error.message}`)
