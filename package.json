@@ -64,9 +64,14 @@
                     "type": "string",
                     "description": "Default branch name to use if it cannot be determined dynamically"
                 },
+                "copyGithubUrl.domainOverride": {
+                    "type": "string",
+                    "description": "GitHub domain override, for scenarios like enterprise instances or SSH aliases. E.g. github.example.com"
+                },
                 "copyGithubUrl.gitUrl": {
                     "type": "string",
-                    "description": "The github domain. Eg: github.example.com"
+                    "description": "Deprecated: Use domainOverride instead. GitHub domain override, for scenarios like enterprise instances or SSH aliases.",
+                    "deprecationMessage": "This setting is deprecated. Please use copyGithubUrl.domainOverride instead."
                 },
                 "copyGithubUrl.rootGitFolder": {
                     "type": "string",
