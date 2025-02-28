@@ -16,26 +16,46 @@ function setTestEnvironment (isTest) {
 
 /**
  * Returns a GitHub URL to the currently selected line or range in VSCode instance.
+ * Also works for non-text files (without line numbers).
  *
- * @param {Object} editor
+ * @param {Object} editor - The editor or null if no active text editor
  * @param {Object} [type={}]
+ * @param {vscode.Uri} [fileUri] - URI of the file when no editor is active
  * @returns {Promise<string|null>} Returns an URL or `null` if could not be determined.
  */
-async function getGithubUrl (editor, type = {}) {
+async function getGithubUrl (editor, type = {}, fileUri = null) {
   try {
-    const { document, selection } = editor
+    // Check for Git extension first
     const gitExtension = vscode.extensions.getExtension('vscode.git')
-    if (!gitExtension) throw new Error('Git extension not found')
-    if (!gitExtension.isActive) await gitExtension.activate()
+    if (!gitExtension) throw new Error('Git extension not found. Please make sure the Git extension is installed and enabled.')
+    if (!gitExtension.isActive) {
+      try {
+        await gitExtension.activate()
+      } catch (error) {
+        throw new Error(`Failed to activate Git extension: ${error.message}`)
+      }
+    }
+
+    let uri; let lineRef = ''
+
+    // Handle case when editor is provided (text files)
+    if (editor) {
+      const { document, selection } = editor
+      uri = document.uri
+      lineRef = `#L${selection.start.line + 1}${selection.isSingleLine ? '' : `-L${selection.end.line + 1}`}`
+    } else if (fileUri) { // Handle case for non-text files (pass fileUri directly)
+      uri = fileUri
+      // No line reference needed for non-text files
+    } else {
+      throw new Error('Neither editor nor fileUri provided')
+    }
 
     // Uses vscode.git extension to get repository, does not use .git/config
-    const repository = await getRepository(gitExtension.exports.getAPI(1), editor)
+    const repository = await getRepository(gitExtension.exports.getAPI(1), editor, uri)
 
     // Uses repository rootUri to get relative path for document
-    let relativePath = path.relative(repository.rootUri.fsPath, document.uri.fsPath)
+    let relativePath = path.relative(repository.rootUri.fsPath, uri.fsPath)
     relativePath = module.exports.normalizePathForGitHub(relativePath)
-
-    const lineRef = `L${selection.start.line + 1}${selection.isSingleLine ? '' : `-L${selection.end.line + 1}`}`
 
     // Uses repository to find the remote fetchUrl and then uses githubUrlFromGit to generate the URL
     const githubUrl = await getGithubUrlFromRemotes(repository)
@@ -56,7 +76,7 @@ async function getGithubUrl (editor, type = {}) {
         : repository.state.HEAD?.name || 'main'
     }
     const branch = await getBranch()
-    return `${githubUrl}/blob/${branch}/${relativePath}#${lineRef}`
+    return `${githubUrl}/blob/${branch}/${relativePath}${lineRef}`
   } catch (error) {
     if (!isTestEnvironment) console.error('Failed to get GitHub URL:', error)
     throw error
@@ -165,14 +185,41 @@ async function getGithubUrlFromRemotes (repository) {
   const config = vscode.workspace.getConfiguration('copyGithubUrl')
   // Check domainOverride first, fall back to gitUrl for backwards compatibility
   const domainOverride = config.get('domainOverride') || config.get('gitUrl')
-  const remotes = repository.state.remotes
+
+  // Safely get remotes from repository state
+  const remotes = repository?.state?.remotes || []
+  if (!Array.isArray(remotes) || remotes.length === 0) {
+    if (!isTestEnvironment) console.warn('Repository remotes not available or empty')
+  }
 
   // Try to get the remote for the current branch first
-  const currentBranch = repository.state.HEAD?.name
+  const currentBranch = repository?.state?.HEAD?.name
   if (currentBranch) {
-    const branchConfig = repository.state.refs.find(ref =>
-      ref.name === currentBranch && ref.remote
-    )
+    // Get refs using the appropriate method based on API version
+    let refs
+    try {
+      if (repository.getRefs) {
+        refs = repository.getRefs()
+      } else {
+        refs = repository.state.refs
+      }
+
+      // Check if refs is actually an array before using find()
+      if (!refs || !Array.isArray(refs)) {
+        if (!isTestEnvironment) console.warn('Repository refs is not an array:', typeof refs)
+        refs = []
+      }
+    } catch (error) {
+      if (!isTestEnvironment) console.warn('Error getting repository refs:', error.message)
+      refs = []
+    }
+
+    const branchConfig = refs.length > 0
+      ? refs.find(ref =>
+        ref.name === currentBranch && ref.remote
+      )
+      : null
+
     if (branchConfig) {
       const remote = remotes.find(r => r.name === branchConfig.remote)
       if (remote) {
@@ -230,36 +277,51 @@ function normalizePathForGitHub (inputPath, pathSeparator = path.sep) {
  * Retrieves the repository from the Git API.
  *
  * @param {Object} git - The Git API instance.
- * @param {Object} editor - The editor object.
+ * @param {Object} editor - The editor object, can be null for non-text files.
+ * @param {vscode.Uri} [fileUri] - The URI of the file, used when editor is null.
  * @returns {Promise<Object>} The repository object.
  */
-async function getRepository (git, editor) {
-  const activeDoc = editor?.document
-  if (!activeDoc) {
-    throw new Error('No active document found. Open a file to use GitHub URL features.')
+async function getRepository (git, editor, fileUri = null) {
+  // Use either the document from the editor or the passed fileUri
+  const uri = editor?.document?.uri || fileUri
+  if (!uri) {
+    throw new Error('No active document or file URI found. Open a file to use GitHub URL features.')
   }
 
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(activeDoc.uri)
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)
   if (!workspaceFolder) {
-    throw new Error('Active document is not in a workspace folder.')
+    throw new Error('File is not in a workspace folder.')
   }
 
-  // First try to find repository containing the active document
-  let repository = git.repositories.find(repo =>
-    activeDoc.uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())
-  )
+  // First try to find repository containing the active document/file
+  let repository = null
+  try {
+    if (git.repositories && Array.isArray(git.repositories)) {
+      repository = git.repositories.find(repo =>
+        uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())
+      )
+    } else {
+      if (!isTestEnvironment) console.warn('Git repositories not available or not an array')
+    }
+  } catch (error) {
+    if (!isTestEnvironment) console.warn('Error finding repository:', error.message)
+  }
 
   // If no repository found, try rootGitFolder configuration as fallback
   if (!repository) {
-    const config = vscode.workspace.getConfiguration('copyGithubUrl')
-    const rootGitFolder = config.get('rootGitFolder')
+    try {
+      const config = vscode.workspace.getConfiguration('copyGithubUrl')
+      const rootGitFolder = config.get('rootGitFolder')
 
-    if (rootGitFolder) {
-      const fullPath = path.resolve(workspaceFolder.uri.fsPath, rootGitFolder)
-      repository = git.repositories.find(repo =>
-        repo.rootUri.fsPath.toLowerCase() === fullPath.toLowerCase() ||
-        repo.rootUri.fsPath.toLowerCase().startsWith(fullPath.toLowerCase())
-      )
+      if (rootGitFolder && git.repositories && Array.isArray(git.repositories)) {
+        const fullPath = path.resolve(workspaceFolder.uri.fsPath, rootGitFolder)
+        repository = git.repositories.find(repo =>
+          repo.rootUri.fsPath.toLowerCase() === fullPath.toLowerCase() ||
+          repo.rootUri.fsPath.toLowerCase().startsWith(fullPath.toLowerCase())
+        )
+      }
+    } catch (error) {
+      if (!isTestEnvironment) console.warn('Error using rootGitFolder fallback:', error.message)
     }
   }
 
@@ -270,9 +332,19 @@ async function getRepository (git, editor) {
     let timeoutId
     repository = await new Promise((resolve, reject) => {
       disposable = git.onDidOpenRepository(repo => {
-        if (activeDoc.uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())) {
+        if (uri.fsPath.toLowerCase().startsWith(repo.rootUri.fsPath.toLowerCase())) {
           clearTimeout(timeoutId)
           disposable.dispose()
+
+          // Workaround for VS Code issue with non-text files:
+          // When working with image files or other non-text files, VS Code's inline chat feature
+          // can cause errors like "command 'inlineChat.hideHint' not found". This happens because
+          // inline chat UI components aren't properly initialized for non-text editors.
+          // This line proactively dismisses any inline chat UI elements that might cause problems,
+          // and the safeExecuteCommand wrapper ensures any errors are caught silently without
+          // crashing the extension. This prevents the "rejected promise not handled within 1 second" error.
+          safeExecuteCommand('inlineChat.hideHint')
+
           resolve(repo)
         }
       })
@@ -285,18 +357,56 @@ async function getRepository (git, editor) {
   }
 
   // Wait for remotes to populate
-  // TODO: Using a hard-coded 5-second timeout for repository discovery may cause unexpected failures in larger or more complex projects.
-  // TODO: Consider making this timeout configurable or dynamically adjusting based on repository size.
+  // Safely handle potential missing repository state/remotes
+  if (!repository?.state) {
+    throw new Error('Repository state is not available. Git data might be loading or corrupted.')
+  }
+
   let attempts = 0
-  while (attempts < 10) {
+  const MAX_ATTEMPTS = 10
+  const RETRY_DELAY = 500 // ms
+
+  // Show warning if remotes aren't already populated
+  if (!repository.state.remotes || repository.state.remotes.length === 0) {
+    if (!isTestEnvironment) {
+      console.warn('Repository remotes not immediately available, waiting for them to populate...')
+    }
+  }
+
+  while (attempts < MAX_ATTEMPTS) {
     if (repository.state.remotes && repository.state.remotes.length > 0) {
       return repository
     }
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
     attempts++
+
+    // Log progress after a few attempts
+    if (attempts === 3 && !isTestEnvironment) {
+      console.log(`Still waiting for Git remotes to populate (attempt ${attempts}/${MAX_ATTEMPTS})...`)
+    }
   }
 
-  throw new Error('Timeout waiting for repository remotes to populate')
+  throw new Error('Timeout waiting for repository remotes to populate. The repository may not have any remotes configured, or Git data is still loading.')
+}
+
+// Helper function to properly handle errors
+function safeExecuteCommand (commandId, ...args) {
+  try {
+    // Return a proper Promise to allow catch chaining
+    return Promise.resolve(vscode.commands.executeCommand(commandId, ...args))
+      .catch(error => {
+        // Handle error inside the Promise chain
+        if (!commandId.startsWith('inlineChat.')) {
+          console.warn(`Command execution failed: ${commandId}`, error)
+        }
+      })
+  } catch (error) {
+    // This catch handles synchronous errors in the try block
+    if (!commandId.startsWith('inlineChat.')) {
+      console.warn(`Command execution failed: ${commandId}`, error)
+    }
+    return Promise.resolve()
+  }
 }
 
 module.exports = {

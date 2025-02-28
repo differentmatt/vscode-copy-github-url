@@ -15,6 +15,7 @@ const { createGitApi } = require('./gitApiFactory')
  * @param {String} [options.sep] Separator to use for the path
  * @param {Number} [options.startLine] Current, focused line number
  * @param {Array} [options.workspaceFolders] Array of workspace folders
+ * @param {Boolean} [options.isNonTextFile] If true, simulates a non-text file like an image
  * @returns {Object} An `vscode` alike object
  */
 function getVsCodeMock (options) {
@@ -27,23 +28,71 @@ function getVsCodeMock (options) {
   const startLine = options.startLine !== undefined ? options.startLine : 1
   const endLine = options.endLine !== undefined ? options.endLine : startLine
 
-  const editorMock = {
-    selection: {
-      active: { line: startLine },
-      start: { line: startLine },
-      end: { line: endLine },
-      isSingleLine: startLine === endLine
-    },
-    document: {
-      uri: { fsPath: fullPath }
-    }
-  }
+  const editorMock = options.isNonTextFile
+    ? null
+    : {
+        selection: {
+          active: { line: startLine },
+          start: { line: startLine },
+          end: { line: endLine },
+          isSingleLine: startLine === endLine
+        },
+        document: {
+          uri: { fsPath: fullPath }
+        }
+      }
+
+  // For non-text files, we'll add activeEditorPane
+  const activeEditorPane = options.isNonTextFile
+    ? {
+        input: {
+          uri: {
+            fsPath: fullPath
+          }
+        }
+      }
+    : undefined
+
+  // Setup Tab Groups for non-text files
+  const tabGroups = options.isNonTextFile
+    ? {
+        activeTabGroup: {
+          activeTab: {
+            label: options.filePath.split('/').pop(),
+            input: {
+              uri: {
+                fsPath: fullPath,
+                toString: () => `file://${fullPath}`
+              }
+            }
+          },
+          tabs: [{
+            label: options.filePath.split('/').pop(),
+            input: {
+              uri: {
+                fsPath: fullPath,
+                toString: () => `file://${fullPath}`
+              }
+            }
+          }]
+        }
+      }
+    : undefined
 
   return {
     workspace: {
       workspaceFolders: options.workspaceFolders || [{ uri: { fsPath: projectRoot } }]
     },
-    window: { activeTextEditor: editorMock },
+    Uri: {
+      file: (path) => ({ fsPath: path }),
+      parse: (uriString) => ({ fsPath: uriString })
+    },
+    window: {
+      activeTextEditor: editorMock,
+      activeEditorPane,
+      visibleTextEditors: [],
+      tabGroups
+    },
     extensions: {
       getExtension: (extensionId) => {
         if (extensionId !== 'vscode.git') {
