@@ -40,7 +40,7 @@ function getBaseTelemetryData () {
     isWorkspaceRoot,
     isMultiWorkspace: vscode.workspace.workspaceFolders?.length > 1,
     fileExtension: path.extname(relativePath || '') || 'none', // File type being shared
-    isTextFile: !!vscode.window.activeTextEditor // Whether it's a text file (with editor) or not
+    hasActiveTextEditor: !!vscode.window.activeTextEditor // Whether file is opened in a text editor
   }
 }
 let reporter
@@ -87,51 +87,64 @@ function activate (context) {
     vscode.window.showErrorMessage(errorMessage)
   }
 
+  /**
+   * Helper function to get the URI of the active file using multiple VS Code APIs
+   *
+   * @returns {Object} Object containing editor and/or fileUri
+   */
+  const getActiveFileInfo = () => {
+    // Method 1: Check primary active text editor first
+    if (vscode.window.activeTextEditor) {
+      return { editor: vscode.window.activeTextEditor, fileUri: null }
+    }
+
+    // Method 2: Check other visible text editors
+    const visibleEditor = vscode.window.visibleTextEditors.find(e => e.visibleRanges.length > 0)
+    if (visibleEditor) {
+      return { editor: visibleEditor, fileUri: null }
+    }
+
+    // Method 3: Check activeEditorPane API for non-text files
+    if (vscode.window.activeEditorPane?.input?.uri) {
+      return { editor: null, fileUri: vscode.window.activeEditorPane.input.uri }
+    }
+
+    // Method 4: Use Tab Groups API for non-text files (VS Code 1.46+)
+    if (vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri) {
+      return { editor: null, fileUri: vscode.window.tabGroups.activeTabGroup.activeTab.input.uri }
+    }
+
+    // No active file found - return without logging any potentially sensitive paths
+    return { editor: null, fileUri: null }
+  }
+
   // Function to generate the command body
   const generateCommandBody = (config) => {
     return async () => {
       try {
-        // Get the active editor or active file in the explorer
-        const activeTextEditor = vscode.window.activeTextEditor
+        // Get info about the active file
+        const { editor, fileUri } = getActiveFileInfo()
         let url
 
-        if (activeTextEditor) {
+        if (editor) {
           // Handle text files with line numbers
-          url = await main.getGithubUrl(activeTextEditor, config)
-        } else {
+          url = await main.getGithubUrl(editor, config)
+        } else if (fileUri) {
           // Handle non-text files without line numbers
-          // Try multiple VS Code APIs to find the active file
-          let fileUri = null
-
-          // Method 1: Check visible text editors
-          const activeEditor = vscode.window.visibleTextEditors.find(e => e.visibleRanges.length > 0)
-          if (activeEditor) {
-            // Use the visible editor
-            url = await main.getGithubUrl(activeEditor, config)
-
-          // Method 2: Check activeEditorPane.input.uri (works for some non-text files)
-          } else if (vscode.window.activeEditorPane?.input?.uri) {
-            fileUri = vscode.window.activeEditorPane.input.uri
-
-          // Method 3: Use Tab Groups API (for VS Code 1.46+, most reliable for non-text files)
-          } else if (vscode.window.tabGroups?.activeTabGroup?.activeTab?.input?.uri) {
-            fileUri = vscode.window.tabGroups.activeTabGroup.activeTab.input.uri
+          url = await main.getGithubUrl(null, config, fileUri)
+        } else {
+          // If no file found, log debug info and throw error
+          const debugInfo = {
+            hasActiveEditorPane: !!vscode.window.activeEditorPane,
+            hasInput: !!vscode.window.activeEditorPane?.input,
+            hasTabGroups: !!vscode.window.tabGroups,
+            hasActiveTabGroup: !!vscode.window.tabGroups?.activeTabGroup,
+            hasActiveTab: !!vscode.window.tabGroups?.activeTabGroup?.activeTab,
+            activeTabName: vscode.window.tabGroups?.activeTabGroup?.activeTab?.label || null
           }
 
-          // If we found a URI through method 2 or 3, use it
-          if (fileUri) {
-            url = await main.getGithubUrl(null, config, fileUri)
-          } else {
-            console.error('No active file found. Debug info:', {
-              hasActiveEditorPane: !!vscode.window.activeEditorPane,
-              hasInput: !!vscode.window.activeEditorPane?.input,
-              hasTabGroups: !!vscode.window.tabGroups,
-              hasActiveTabGroup: !!vscode.window.tabGroups?.activeTabGroup,
-              hasActiveTab: !!vscode.window.tabGroups?.activeTabGroup?.activeTab,
-              activeTabName: vscode.window.tabGroups?.activeTabGroup?.activeTab?.label || null
-            })
-            throw new Error('No active file found')
-          }
+          console.error('No active file found. Debug info:', debugInfo)
+          throw new Error('No active file found')
         }
 
         if (url) {
@@ -141,7 +154,7 @@ function activate (context) {
             const telemetryData = {
               urlType: config.perma ? 'permalink' : (config.default ? 'default' : 'current'),
               hasLineRange: url.includes('-L'), // Single line vs range selection
-              isTextFile: !!activeTextEditor
+              hasActiveTextEditor: !!editor // Whether from text editor or other editor type
             }
             reporter?.sendTelemetryEvent('url_copied', { ...getBaseTelemetryData(), ...telemetryData })
           } catch (e) {
@@ -180,15 +193,17 @@ function activate (context) {
       if (vscode.window.tabGroups?.activeTabGroup?.activeTab?.input) {
         info.activeTabInputUri = !!vscode.window.tabGroups.activeTabGroup.activeTab.input.uri
         if (vscode.window.tabGroups.activeTabGroup.activeTab.input.uri) {
+          // Include full path information for local debugging
           info.uri = vscode.window.tabGroups.activeTabGroup.activeTab.input.uri.toString()
           info.fsPath = vscode.window.tabGroups.activeTabGroup.activeTab.input.uri.fsPath
         }
       }
 
+      // Log detailed debug info to local console
       console.log('Debug info:', JSON.stringify(info, null, 2))
-      vscode.window.showInformationMessage('Debug info logged to console. See Developer Tools.')
+      vscode.window.showInformationMessage('Debug info logged to console. Check Developer Tools to view.')
 
-      // Show in notification for easy viewing
+      // Show complete debug info in the notification for easier troubleshooting
       await vscode.window.showInformationMessage(JSON.stringify(info, null, 2))
     } catch (e) {
       console.error('Error in debug command:', e)
