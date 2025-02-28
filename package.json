@@ -38,25 +38,48 @@
             {
                 "command": "extension.gitHubUrlDefault",
                 "title": "Copy GitHub URL (Main)"
+            },
+            {
+                "command": "extension.gitHubUrlDebug",
+                "title": "Debug Copy GitHub URL (Non-text files)"
             }
         ],
         "keybindings": [
             {
                 "command": "extension.gitHubUrl",
                 "key": "ctrl+l c",
-                "when": "editorTextFocus"
+                "when": "editorFocus || activeEditorIsNotText || resourceScheme == 'file' || activeViewlet == 'workbench.view.explorer'"
             },
             {
                 "command": "extension.gitHubUrlPerma",
                 "key": "ctrl+shift+l c",
-                "when": "editorTextFocus"
+                "when": "editorFocus || activeEditorIsNotText || resourceScheme == 'file' || activeViewlet == 'workbench.view.explorer'"
             },
             {
                 "command": "extension.gitHubUrlDefault",
                 "key": "ctrl+shift+l m",
-                "when": "editorTextFocus"
+                "when": "editorFocus || activeEditorIsNotText || resourceScheme == 'file' || activeViewlet == 'workbench.view.explorer'"
             }
         ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "extension.gitHubUrl",
+                    "group": "7_modification",
+                    "when": "resourceScheme == 'file'"
+                },
+                {
+                    "command": "extension.gitHubUrlPerma",
+                    "group": "7_modification",
+                    "when": "resourceScheme == 'file'"
+                },
+                {
+                    "command": "extension.gitHubUrlDefault", 
+                    "group": "7_modification",
+                    "when": "resourceScheme == 'file'"
+                }
+            ]
+        },
         "configuration": {
             "title": "Copy github url configuration",
             "properties": {
