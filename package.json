@@ -1,6 +1,6 @@
 {
     "name": "copy-github-url",
-    "version": "0.16.0",
+    "version": "0.17.0",
     "publisher": "mattlott",
     "displayName": "Copy GitHub URL",
     "description": "Copy GitHub URL for current location to clipboard.",
@@ -74,7 +74,7 @@
                     "when": "resourceScheme == 'file'"
                 },
                 {
-                    "command": "extension.gitHubUrlDefault", 
+                    "command": "extension.gitHubUrlDefault",
                     "group": "7_modification",
                     "when": "resourceScheme == 'file'"
                 }
